@@ -11,6 +11,7 @@ const envSchema = z.object({
   SUPABASE_JWT_SECRET: z.string(),
   
   GROQ_API_KEY: z.string(),
+  GROQ_MODEL: z.string(),
   
   RATE_LIMIT_PER_MIN: z.coerce.number().default(60),
 });
