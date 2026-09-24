@@ -1,0 +1,23 @@
+/**
+ * Warden — 6-token HSL Brand Theme
+ * ---------------------------------
+ * All colour in the app comes from these tokens.
+ * Never hard-code a colour value anywhere else.
+ *
+ * Tokens:
+ *   --warden-bg         Main background
+ *   --warden-surface     Cards, panels, elevated containers
+ *   --warden-border      Subtle dividers, outlines
+ *   --warden-text        Primary text
+ *   --warden-primary     Brand accent (CTAs, links, focus rings)
+ *   --warden-danger      Destructive / alert accent
+ */
+
+:root {
+  --warden-bg:       220 20% 6%;        /* near-black deep navy   */
+  --warden-surface:  222 18% 11%;       /* dark card surface      */
+  --warden-border:   224 14% 18%;       /* subtle slate divider   */
+  --warden-text:     210 20% 92%;       /* off-white text         */
+  --warden-primary:  165 82% 51%;       /* vivid teal accent      */
+  --warden-danger:   0 84% 60%;         /* red alert              */
+}

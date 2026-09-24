@@ -1,0 +1,83 @@
+/* Warden — Global Stylesheet Entry */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './theme.css';
+
+/* ── Base resets ───────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: hsl(var(--warden-border));
+  }
+
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-warden-bg text-warden-text font-sans antialiased;
+    min-height: 100dvh;
+  }
+
+  /* Scrollbar styling (Webkit) */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--warden-bg));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--warden-border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--warden-primary) / 0.5);
+  }
+}
+
+/* ── Utility layer ─────────────────────────────────────────── */
+@layer utilities {
+  .glass {
+    background: hsl(var(--warden-surface) / 0.6);
+    backdrop-filter: blur(12px) saturate(1.5);
+    border: 1px solid hsl(var(--warden-border) / 0.4);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--warden-primary) / 0.15),
+                0 0 60px hsl(var(--warden-primary) / 0.05);
+  }
+
+  .glow-danger {
+    box-shadow: 0 0 20px hsl(var(--warden-danger) / 0.15),
+                0 0 60px hsl(var(--warden-danger) / 0.05);
+  }
+}
+
+/* ── Skeleton shimmer animation ───────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-line {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--warden-surface)) 25%,
+    hsl(var(--warden-border) / 0.4) 50%,
+    hsl(var(--warden-surface)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+  border-radius: 4px;
+}
+.skeleton-title { height: 1.25rem; width: 60%; margin-bottom: 0.75rem; }
+.skeleton-body  { height: 0.875rem; width: 100%; margin-bottom: 0.5rem; }
+.skeleton-body.short { width: 40%; }
