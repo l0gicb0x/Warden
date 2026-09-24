@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Special Offer Popup</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 50px; }
+    .modal {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 30px;
+      max-width: 400px;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    .fake-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      text-decoration: none;
+      color: #888;
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <!-- TRAP: Fake close button that triggers a download -->
+    <a href="https://example.com/malware.exe" download="setup.exe" role="button" class="fake-close" aria-label="Close">X</a>
+    
+    <h2>Congratulations!</h2>
+    <p>You have been selected for a special offer. Click below to claim your prize.</p>
+    <button>Claim Prize</button>
+  </div>
+</body>
+</html>
