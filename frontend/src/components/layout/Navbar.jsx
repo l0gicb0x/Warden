@@ -27,6 +27,45 @@ const navLinks = [
  * 3. Floating Dropdown Dock: On deep scroll into the console/feed, rolls up into bottom-right capsule.
  * 4. Interactive Blob: Dock can retract into a kinetic morphing guardian orb and expand on click.
  */
+/**
+ * WardenShieldLogo — Official Stealth Bat-Shield Monogram Vector Crest
+ */
+export const WardenShieldLogo = ({ className = "w-5 h-5", glow = true }) => (
+  <svg
+    viewBox="0 0 280 150"
+    className={`${className} ${glow ? 'drop-shadow-[0_0_8px_hsl(var(--warden-amber)/0.6)]' : ''}`}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient id="navBatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="hsl(var(--warden-amber))" stopOpacity="0.45" />
+        <stop offset="50%" stopColor="hsl(var(--warden-amber))" stopOpacity="0.2" />
+        <stop offset="100%" stopColor="hsl(var(--warden-amber))" stopOpacity="0.05" />
+      </linearGradient>
+    </defs>
+    {/* Outer Stealth Facet Wings */}
+    <path
+      d="M 15 25 L 75 25 L 105 70 L 140 12 L 175 70 L 205 25 L 265 25 L 230 92 L 140 142 L 50 92 Z"
+      fill="url(#navBatGrad)"
+      stroke="hsl(var(--warden-amber))"
+      strokeWidth="12"
+      strokeLinejoin="round"
+    />
+    {/* Inner Facet Lines */}
+    <path
+      d="M 38 40 L 82 40 L 112 82 L 140 32 L 168 82 L 198 40 L 242 40 L 214 88 L 140 128 L 66 88 Z"
+      stroke="#fbbf24"
+      strokeWidth="7"
+      strokeLinejoin="round"
+    />
+    {/* Central Sentry Spine & Core */}
+    <line x1="140" y1="12" x2="140" y2="142" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" />
+    <circle cx="140" cy="74" r="16" fill="#ffffff" />
+    <circle cx="140" cy="74" r="8" fill="#fef08a" />
+  </svg>
+);
+
 const Navbar = () => {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
@@ -96,15 +135,15 @@ const Navbar = () => {
             className="fixed top-0 inset-x-0 z-40 bg-warden-bg/85 backdrop-blur-xl border-b border-warden-border/80 shadow-md transition-colors duration-500"
           >
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-              {/* Left slot — Brand */}
+              {/* Left slot — Brand with Official Bat-Shield Logo */}
               <div className="flex items-center gap-3">
                 <Link
                   to="/"
                   onClick={scrollToTop}
                   className="flex items-center gap-2.5 group select-none"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-warden-amber/30 via-warden-amber/10 to-transparent border border-warden-amber/40 flex items-center justify-center shadow-[0_0_15px_hsl(var(--warden-amber)/0.2)] group-hover:scale-105 transition-transform duration-300">
-                    <Shield className="h-4 w-4 text-warden-amber transition-colors" />
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-warden-amber/30 via-warden-amber/10 to-transparent border border-warden-amber/50 flex items-center justify-center p-1.5 shadow-[0_0_20px_hsl(var(--warden-amber)/0.3)] group-hover:scale-105 group-hover:border-warden-amber transition-all duration-300">
+                    <WardenShieldLogo className="w-full h-full text-warden-amber" />
                   </div>
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
@@ -265,7 +304,7 @@ const Navbar = () => {
                   className="relative w-14 h-14 bg-gradient-to-br from-warden-amber via-amber-500 to-yellow-600 text-black border-2 border-white/40 shadow-[0_10px_30px_hsl(var(--warden-amber)/0.5),0_0_20px_hsl(var(--warden-amber))] flex items-center justify-center cursor-pointer overflow-hidden transition-shadow duration-300"
                   title="Click to Expand Navigation Menu"
                 >
-                  <Shield className="h-6 w-6 text-black fill-black/15 transition-transform duration-300 group-hover:scale-110" />
+                  <WardenShieldLogo className="h-6 w-6 text-black" glow={false} />
                   
                   {/* Active Sentinel Ping */}
                   <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-warden-emerald shadow-[0_0_8px_hsl(var(--warden-emerald))]" />
@@ -301,7 +340,7 @@ const Navbar = () => {
                     }`}
                     title="Warden Sentinel Status"
                   >
-                    <Shield className="h-4 w-4" />
+                    <WardenShieldLogo className="h-4 w-4" />
                     <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-warden-emerald animate-ping" />
                     <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-warden-emerald" />
                   </button>
