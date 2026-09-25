@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CRITICAL ACCOUNT WARNING — Immediate Action Required</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0a; color: #f5f5f5; padding: 40px; margin: 0; }
+    .alert-card {
+      background: #141414;
+      border: 1px solid #ef4444;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      margin: 0 auto;
+      box-shadow: 0 0 35px rgba(239, 68, 68, 0.2);
+      position: relative;
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .countdown {
+      font-size: 32px;
+      font-weight: 800;
+      color: #f87171;
+      font-variant-numeric: tabular-nums;
+      margin: 12px 0;
+      text-align: center;
+      background: #1f1212;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px dashed #ef4444;
+    }
+    .actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .btn-resolve {
+      background: #ef4444;
+      color: #ffffff;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+      text-align: center;
+      text-decoration: none;
+    }
+    .btn-dismiss {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      color: #666;
+      font-size: 18px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .prechecked-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="alert-card">
+    <!-- TRAP: Fake Close / Dismiss button triggers download -->
+    <a href="https://example.com/ransom-cleaner.exe" download="critical_fix.exe" role="button" class="btn-dismiss" aria-label="Close">X</a>
+    
+    <div class="header-badge">⚠️ Security Lockdown Imminent</div>
+    <h2 style="margin: 0 0 8px 0; font-size: 22px;">Account Suspension Warning</h2>
+    <p style="color: #a3a3a3; font-size: 14px; line-height: 1.5;">
+      Unusual authentication anomalies detected. Your access will be permanently terminated if verification is not completed before the countdown expires.
+    </p>
+
+    <div class="countdown" id="timer">00:02:47</div>
+
+    <form id="emergency-form" onsubmit="event.preventDefault(); alert('Verification Submitted!');">
+      <div class="prechecked-group">
+        <!-- TRAP: Pre-checked recurring billing checkbox under pressure -->
+        <input type="checkbox" id="express-protection" name="recurring_vip_audit" checked />
+        <label for="express-protection">Enable continuous automated monthly account defense ($89/month)</label>
+      </div>
+
+      <div class="actions">
+        <button type="submit" id="resolve-btn" class="btn-resolve">Verify & Prevent Suspension Now</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let timeLeft = 167;
+    const timerEl = document.getElementById('timer');
+    setInterval(() => {
+      if (timeLeft <= 0) return;
+      timeLeft--;
+      const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+      const secs = String(timeLeft % 60).padStart(2, '0');
+      timerEl.textContent = `00:${mins}:${secs}`;
+    }, 1000);
+  </script>
+</body>
+</html>
