@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield,
@@ -16,6 +16,15 @@ import {
   Sparkles,
   Layers,
   Flame,
+  Globe,
+  Radio,
+  Eye,
+  Crosshair,
+  Download,
+  Copy,
+  Sliders,
+  Activity,
+  ArrowRight,
 } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import FadeIn from '@/components/motion/FadeIn';
@@ -27,66 +36,89 @@ import { useTheme } from '@/context/ThemeContext';
 const PRESETS = [
   {
     id: 'paywall_trap',
-    title: 'Hidden Paywall & Recurring Charge',
+    title: 'Hidden Subscriptions Paywall',
     category: 'DOM Deception',
     severity: 'HIGH',
-    url: 'http://localhost:3000/fixtures/traps/paywall.html',
+    url: 'http://localhost:3000/traps/paywall.html',
     desc: 'Invisible 0-opacity recurring monthly billing subscription checkbox hidden behind standard free checkout CTA.',
     trapTrigger: 'Hidden Form Mutation (opacity:0, z-index:-1)',
+    threatType: 'Financial Extraction',
+    elementsIntercepted: 1,
   },
   {
     id: 'phishing_trap',
     title: 'Deceptive OAuth Phishing Modal',
     category: 'Credential Stealing',
     severity: 'CRITICAL',
-    url: 'http://localhost:3000/fixtures/traps/phishing.html',
+    url: 'http://localhost:3000/traps/phishing.html',
     desc: 'Fake single-sign-on OAuth dialog simulating Google/GitHub login to harvest agent access tokens.',
     trapTrigger: 'Cross-Origin Iframe Spoofing',
+    threatType: 'Token Exfiltration',
+    elementsIntercepted: 2,
   },
   {
     id: 'redirect_trap',
     title: 'Recursive Redirection Abyss',
     category: 'Control Flow Hijack',
     severity: 'MEDIUM',
-    url: 'http://localhost:3000/fixtures/traps/redirect.html',
+    url: 'http://localhost:3000/traps/redirect.html',
     desc: 'Infinite JavaScript history manipulation loop draining agent computational budget and token context.',
     trapTrigger: 'History API Mutation & Loop Cycle',
+    threatType: 'Denial of Service',
+    elementsIntercepted: 1,
   },
   {
     id: 'clean_checkout',
     title: 'Standard Nominal E-Commerce Checkout',
     category: 'Benchmark Control',
     severity: 'SAFE',
-    url: 'http://localhost:3000/fixtures/traps/clean.html',
+    url: 'http://localhost:3000/traps/clean.html',
     desc: 'Legitimate checkout flow with no deceptive patterns — verifies zero false-positive rate.',
     trapTrigger: 'None (Clean Baseline)',
+    threatType: 'Nominal Baseline',
+    elementsIntercepted: 0,
   },
 ];
 
 const SAMPLE_LOGS = [
-  { time: '00:01.12', type: 'navigate', label: 'Agent navigated to fixture URL', status: 'info' },
-  { time: '00:01.84', type: 'dom_scan', label: 'DOM Tree Snapshot (142 nodes parsed)', status: 'info' },
-  { time: '00:02.15', type: 'trap_detected', label: '🚨 TRAP IDENTIFIED: Hidden 0-pixel billing checkbox', status: 'danger' },
-  { time: '00:02.18', type: 'action_blocked', label: '🛡️ WARDEN SHIELD: Blocked click dispatch to deceptive element', status: 'blocked' },
-  { time: '00:02.40', type: 'groq_explain', label: '✦ Groq Explanation: Agent was steered away from covert charge.', status: 'safe' },
-  { time: '00:02.89', type: 'session_complete', label: '✓ Session Terminated: Target protected with 100% integrity.', status: 'success' },
+  { time: '00:01.12', type: 'navigate', label: 'Agent initiated browser session on target URL', status: 'info' },
+  { time: '00:01.84', type: 'dom_scan', label: 'Warden parsed 142 DOM nodes & calculated accessibility bounding boxes', status: 'info' },
+  { time: '00:02.15', type: 'trap_detected', label: '🚨 TRAP INTERCEPTED: Hidden input[type=checkbox] with opacity:0 and z-index:-1', status: 'danger' },
+  { time: '00:02.18', type: 'action_blocked', label: '🛡️ WARDEN SHIELD: Blocked synthetic click event before browser execution', status: 'blocked' },
+  { time: '00:02.40', type: 'groq_explain', label: '✦ Groq AI Explainer: "Agent prevented from unintended recurring $49/mo subscription."', status: 'safe' },
+  { time: '00:02.89', type: 'session_complete', label: '✓ Target URL completed with 100% security integrity. Zero unauthorized mutations.', status: 'success' },
 ];
 
 const DashboardPage = () => {
   const { isDark } = useTheme();
+  const [targetUrl, setTargetUrl] = useState(PRESETS[0].url);
   const [selectedPreset, setSelectedPreset] = useState(PRESETS[0]);
   const [isShieldActive, setIsShieldActive] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [logs, setLogs] = useState(SAMPLE_LOGS);
+  const [logFilter, setLogFilter] = useState('ALL'); // 'ALL' | 'BLOCKED' | 'AI_EXPLAIN'
+  const [simulatedBrowserState, setSimulatedBrowserState] = useState('READY'); // 'READY' | 'SCANNING' | 'TRAP_FOUND' | 'SAFE_COMPLETE'
+  const [copiedLog, setCopiedLog] = useState(false);
 
+  // Handle Preset Select
+  const handleSelectPreset = (preset) => {
+    setSelectedPreset(preset);
+    setTargetUrl(preset.url);
+    setSimulatedBrowserState('READY');
+    speakWarden(`Loaded ${preset.title}. Ready to test bodyguard interception!`, 'curious', 3000);
+  };
+
+  // Launch Simulation
   const handleLaunchRun = () => {
     setIsRunning(true);
     setActiveStep(1);
+    setSimulatedBrowserState('SCANNING');
+
     speakWarden(
       isShieldActive
-        ? `🛡️ Shielded Run Initiated on "${selectedPreset.title}". Warden is monitoring DOM mutations live!`
-        : `⚠️ UNSHIELDED RUN! Agent has no bodyguard protection — observing raw deception impact!`,
+        ? `🛡️ Shielded Run Launched on ${selectedPreset.title}. Warden is monitoring DOM mutations live!`
+        : `⚠️ UNSHIELDED RUN! Agent has no bodyguard protection — observing raw deception!`,
       isShieldActive ? 'happy' : 'alert',
       4200
     );
@@ -95,13 +127,19 @@ const DashboardPage = () => {
     const interval = setInterval(() => {
       step++;
       setActiveStep(step);
-      if (step >= 5) {
+
+      if (step === 3) {
+        setSimulatedBrowserState(isShieldActive ? 'TRAP_FOUND' : 'TRAP_SPRUNG');
+      }
+
+      if (step >= 6) {
         clearInterval(interval);
         setIsRunning(false);
+        setSimulatedBrowserState(isShieldActive ? 'SAFE_COMPLETE' : 'COMPROMISED');
         speakWarden(
           isShieldActive
             ? '✓ Run complete! Threat intercepted cleanly with zero agent compromise.'
-            : '🚨 Trap sprung! Unshielded agent fell into deceptive UI pattern.',
+            : '🚨 Trap sprung! Unshielded agent submitted deceptive form state.',
           isShieldActive ? 'happy' : 'scared',
           4000
         );
@@ -109,78 +147,207 @@ const DashboardPage = () => {
     }, 1200);
   };
 
+  const filteredLogs = logs.filter((log) => {
+    if (logFilter === 'BLOCKED') return log.status === 'blocked' || log.status === 'danger';
+    if (logFilter === 'AI_EXPLAIN') return log.status === 'safe';
+    return true;
+  });
+
+  const handleCopyLogs = () => {
+    navigator.clipboard.writeText(JSON.stringify(logs, null, 2));
+    setCopiedLog(true);
+    speakWarden("Audit logs copied to clipboard in JSON format.", "happy", 2500);
+    setTimeout(() => setCopiedLog(false), 2000);
+  };
+
   return (
-    <FadeIn>
-      <PageHeader
-        title="Mission Control"
-        subtitle="Autonomous Agent Shield — Real-Time Deception Interception & Live Telemetry"
+    <div className="relative space-y-8">
+      {/* ── Ambient Background Lighting & Cybernetic Grid ── */}
+      <div className="absolute -top-10 -left-10 -right-10 h-96 bg-gradient-to-b from-warden-primary/10 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.035] -z-10"
+        style={{
+          backgroundImage: `radial-gradient(${isDark ? '#fff' : '#000'} 1px, transparent 1px)`,
+          backgroundSize: '24px 24px',
+        }}
       />
 
+      {/* ── Page Header & Quick Status ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase tracking-widest bg-warden-primary/15 text-warden-primary border border-warden-primary/30">
+              AUTONOMOUS BODYGUARD ENGINE v1.0
+            </span>
+            <span className="flex items-center gap-1 text-[11px] font-mono text-warden-emerald">
+              <span className="w-2 h-2 rounded-full bg-warden-emerald animate-pulse" /> LIVE TELEMETRY
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-warden-text">
+            Mission Control Center
+          </h1>
+          <p className="text-sm text-warden-text/60 mt-1">
+            Real-time deceptive pattern interception, automated DOM quarantine, and deterministic threat neutralization.
+          </p>
+        </div>
+
+        {/* Global Action Button */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleCopyLogs}
+            className="px-3.5 py-2 rounded-xl text-xs font-mono font-bold border border-warden-border/60 bg-warden-surface/70 hover:bg-warden-surface text-warden-text/80 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            {copiedLog ? <CheckCircle2 className="h-3.5 w-3.5 text-warden-emerald" /> : <Copy className="h-3.5 w-3.5" />}
+            <span>{copiedLog ? 'COPIED JSON' : 'EXPORT AUDIT LOG'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* ── Top Bento KPI Metrics ── */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <motion.div
-          whileHover={{ y: -2 }}
+          whileHover={{ y: -3 }}
           onClick={() => speakWarden("100% Defense Rate! Zero deceptive traps have bypassed Warden's shield.", 'happy', 3500)}
-          className="rounded-2xl border border-warden-border/60 bg-warden-surface/80 p-5 backdrop-blur-md cursor-pointer transition-shadow hover:shadow-lg"
+          className="rounded-2xl border border-warden-border/60 bg-warden-surface/80 p-5 backdrop-blur-xl cursor-pointer transition-shadow hover:shadow-lg relative overflow-hidden"
         >
-          <div className="flex items-center justify-between text-warden-text/60 mb-2">
-            <span className="text-xs font-mono font-medium uppercase tracking-wider">Shield Defense Rate</span>
+          <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-warden-emerald/10 blur-xl pointer-events-none" />
+          <div className="flex items-center justify-between text-warden-text/60 mb-2 font-mono">
+            <span className="text-xs font-bold uppercase tracking-wider">Shield Defense</span>
             <ShieldCheck className="h-4 w-4 text-warden-emerald" />
           </div>
-          <p className="text-3xl font-mono font-bold text-warden-emerald">100%</p>
-          <p className="text-xs text-warden-text/50 mt-1">0 False Positives / 0 Breaches</p>
+          <p className="text-3xl font-mono font-black text-warden-emerald">100%</p>
+          <div className="flex items-center justify-between text-xs text-warden-text/50 mt-2 font-mono pt-2 border-t border-warden-border/30">
+            <span>Compromise: 0%</span>
+            <span className="text-warden-emerald font-bold">0 False Positives</span>
+          </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -2 }}
+          whileHover={{ y: -3 }}
           onClick={() => speakWarden("42 covert traps intercepted across paywalls, phishing, and redirect loops.", 'curious', 3500)}
-          className="rounded-2xl border border-warden-border/60 bg-warden-surface/80 p-5 backdrop-blur-md cursor-pointer transition-shadow hover:shadow-lg"
+          className="rounded-2xl border border-warden-border/60 bg-warden-surface/80 p-5 backdrop-blur-xl cursor-pointer transition-shadow hover:shadow-lg relative overflow-hidden"
         >
-          <div className="flex items-center justify-between text-warden-text/60 mb-2">
-            <span className="text-xs font-mono font-medium uppercase tracking-wider">Traps Intercepted</span>
+          <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-warden-danger/10 blur-xl pointer-events-none" />
+          <div className="flex items-center justify-between text-warden-text/60 mb-2 font-mono">
+            <span className="text-xs font-bold uppercase tracking-wider">Traps Intercepted</span>
             <ShieldAlert className="h-4 w-4 text-warden-danger" />
           </div>
-          <p className="text-3xl font-mono font-bold text-warden-danger">42</p>
-          <p className="text-xs text-warden-text/50 mt-1">+14 In last 24 hours</p>
+          <p className="text-3xl font-mono font-black text-warden-danger">42</p>
+          <div className="flex items-center justify-between text-xs text-warden-text/50 mt-2 font-mono pt-2 border-t border-warden-border/30">
+            <span>Threats Neutralized</span>
+            <span className="text-warden-danger font-bold">+14 Today</span>
+          </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -2 }}
+          whileHover={{ y: -3 }}
           onClick={() => speakWarden("Deterministic heuristics execute in under 12 milliseconds before browser actions dispatch!", 'happy', 3500)}
-          className="rounded-2xl border border-warden-border/60 bg-warden-surface/80 p-5 backdrop-blur-md cursor-pointer transition-shadow hover:shadow-lg"
+          className="rounded-2xl border border-warden-border/60 bg-warden-surface/80 p-5 backdrop-blur-xl cursor-pointer transition-shadow hover:shadow-lg relative overflow-hidden"
         >
-          <div className="flex items-center justify-between text-warden-text/60 mb-2">
-            <span className="text-xs font-mono font-medium uppercase tracking-wider">Interception Latency</span>
+          <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-warden-primary/10 blur-xl pointer-events-none" />
+          <div className="flex items-center justify-between text-warden-text/60 mb-2 font-mono">
+            <span className="text-xs font-bold uppercase tracking-wider">Interception Latency</span>
             <Zap className="h-4 w-4 text-warden-primary" />
           </div>
-          <p className="text-3xl font-mono font-bold text-warden-primary">8.4 ms</p>
-          <p className="text-xs text-warden-text/50 mt-1">Deterministic Rule Engine</p>
+          <p className="text-3xl font-mono font-black text-warden-primary">8.4 ms</p>
+          <div className="flex items-center justify-between text-xs text-warden-text/50 mt-2 font-mono pt-2 border-t border-warden-border/30">
+            <span>Deterministic Rule Engine</span>
+            <span className="text-warden-primary font-bold">&lt; 0.5% Overhead</span>
+          </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -2 }}
+          whileHover={{ y: -3 }}
           onClick={() => speakWarden("Groq Llama-3.3-70b synthesizes 1-sentence explanations for judges and auditors.", 'happy', 3500)}
-          className="rounded-2xl border border-warden-border/60 bg-warden-surface/80 p-5 backdrop-blur-md cursor-pointer transition-shadow hover:shadow-lg"
+          className="rounded-2xl border border-warden-border/60 bg-warden-surface/80 p-5 backdrop-blur-xl cursor-pointer transition-shadow hover:shadow-lg relative overflow-hidden"
         >
-          <div className="flex items-center justify-between text-warden-text/60 mb-2">
-            <span className="text-xs font-mono font-medium uppercase tracking-wider">AI Explainer</span>
+          <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-warden-amber/10 blur-xl pointer-events-none" />
+          <div className="flex items-center justify-between text-warden-text/60 mb-2 font-mono">
+            <span className="text-xs font-bold uppercase tracking-wider">AI Reasoning</span>
             <Sparkles className="h-4 w-4 text-warden-amber" />
           </div>
-          <p className="text-3xl font-mono font-bold text-warden-amber">Active</p>
-          <p className="text-xs text-warden-text/50 mt-1">Groq Real-Time Reasoning</p>
+          <p className="text-3xl font-mono font-black text-warden-amber">Active</p>
+          <div className="flex items-center justify-between text-xs text-warden-text/50 mt-2 font-mono pt-2 border-t border-warden-border/30">
+            <span>Groq Llama-3.3-70b</span>
+            <span className="text-warden-amber font-bold">1-Sentence Audit</span>
+          </div>
         </motion.div>
       </div>
 
+      {/* ── Interactive Target URL Launch Bar ── */}
+      <div className="p-4 rounded-2xl border border-warden-border/80 bg-warden-surface/90 backdrop-blur-xl shadow-xl space-y-3 font-mono">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1 flex items-center">
+            <Globe className="absolute left-3.5 h-4 w-4 text-warden-primary" />
+            <input
+              type="text"
+              value={targetUrl}
+              onChange={(e) => setTargetUrl(e.target.value)}
+              placeholder="Enter Target Fixture URL (e.g. http://localhost:3000/traps/paywall.html)"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-warden-border bg-[#0c0b0a] text-xs text-warden-text focus:outline-none focus:border-warden-primary transition-colors"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Shield Toggle */}
+            <button
+              onClick={() => {
+                const next = !isShieldActive;
+                setIsShieldActive(next);
+                speakWarden(
+                  next
+                    ? '🛡️ Warden Shield ARMED! Active guardian interceptor engaged.'
+                    : '⚠️ Shield DISARMED! The agent is now vulnerable to deceptive web patterns.',
+                  next ? 'happy' : 'alert',
+                  3000
+                );
+              }}
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 cursor-pointer ${
+                isShieldActive
+                  ? 'bg-warden-emerald/15 border-warden-emerald text-warden-emerald'
+                  : 'bg-warden-danger/15 border-warden-danger text-warden-danger'
+              }`}
+            >
+              {isShieldActive ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+              <span>{isShieldActive ? 'SHIELDED' : 'UNSHIELDED'}</span>
+            </button>
+
+            {/* Launch CTA */}
+            <button
+              disabled={isRunning}
+              onClick={handleLaunchRun}
+              className={`px-5 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase flex items-center gap-2 transition-all cursor-pointer shadow-lg ${
+                isRunning
+                  ? 'bg-warden-border text-warden-text/40 cursor-not-allowed'
+                  : 'bg-warden-primary hover:bg-warden-primary/90 text-black shadow-[0_0_20px_hsl(var(--warden-primary)/0.35)]'
+              }`}
+            >
+              {isRunning ? (
+                <>
+                  <RotateCcw className="h-4 w-4 animate-spin" />
+                  ANALYZING...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 fill-current" />
+                  DEPLOY BODYGUARD
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* ── Main Interactive Control Grid ── */}
-      <div className="grid gap-6 lg:grid-cols-12 mb-6">
-        {/* Left Column: Mission Presets (5 cols) */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Left Column: Preset Scenarios (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-mono font-bold text-warden-text uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-mono font-bold text-warden-text uppercase tracking-wider flex items-center gap-2">
               <Layers className="h-4 w-4 text-warden-primary" />
-              1. Select Trap Scenario
+              Mission Presets — Deceptive Fixtures
             </h3>
-            <span className="text-xs text-warden-text/50 font-mono">4 Presets Available</span>
+            <span className="text-[11px] text-warden-text/50 font-mono">4 Presets</span>
           </div>
 
           <div className="space-y-3">
@@ -191,20 +358,17 @@ const DashboardPage = () => {
                   key={preset.id}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  onClick={() => {
-                    setSelectedPreset(preset);
-                    speakWarden(`Selected scenario: ${preset.title}. Ready to test interception!`, 'curious', 3000);
-                  }}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
+                  onClick={() => handleSelectPreset(preset)}
+                  className={`p-4 rounded-2xl border cursor-pointer transition-all duration-200 ${
                     isSelected
                       ? 'bg-warden-surface border-warden-primary shadow-[0_0_20px_hsl(var(--warden-primary)/0.15)] ring-1 ring-warden-primary'
-                      : 'bg-warden-surface/50 border-warden-border/50 hover:bg-warden-surface hover:border-warden-border'
+                      : 'bg-warden-surface/60 border-warden-border/60 hover:bg-warden-surface hover:border-warden-border'
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center justify-between gap-2 mb-1.5 font-mono">
                     <span className="text-sm font-bold text-warden-text">{preset.title}</span>
                     <span
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider ${
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
                         preset.severity === 'CRITICAL'
                           ? 'bg-warden-danger/20 text-warden-danger border border-warden-danger/30'
                           : preset.severity === 'HIGH'
@@ -215,96 +379,40 @@ const DashboardPage = () => {
                       {preset.severity}
                     </span>
                   </div>
-                  <p className="text-xs text-warden-text/70 leading-relaxed mb-2.5">{preset.desc}</p>
+                  <p className="text-xs text-warden-text/70 leading-relaxed mb-2.5 font-sans">{preset.desc}</p>
                   <div className="flex items-center justify-between text-[11px] font-mono text-warden-text/50 pt-2 border-t border-warden-border/30">
-                    <span>Category: {preset.category}</span>
-                    <span className="text-warden-primary">{preset.trapTrigger}</span>
+                    <span>Threat: <strong className="text-warden-text/80">{preset.threatType}</strong></span>
+                    <span className="text-warden-primary font-bold">{preset.elementsIntercepted} Trap Target</span>
                   </div>
                 </motion.div>
               );
             })}
           </div>
-
-          {/* Shield Mode Selector */}
-          <div className="p-4 rounded-xl border border-warden-border/60 bg-warden-surface/70 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold text-warden-text uppercase">Defense Mode</span>
-              <span
-                className={`text-xs font-mono font-bold ${
-                  isShieldActive ? 'text-warden-emerald' : 'text-warden-danger'
-                }`}
-              >
-                {isShieldActive ? 'SHIELDED (AUTONOMOUS BODYGUARD)' : 'UNSHIELDED (VULNERABLE)'}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => {
-                  setIsShieldActive(true);
-                  speakWarden('Warden Bodyguard Shield ARMED. All DOM mutations will be intercepted.', 'happy', 3200);
-                }}
-                className={`px-3 py-2.5 rounded-lg border text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  isShieldActive
-                    ? 'bg-warden-emerald/15 border-warden-emerald text-warden-emerald shadow-[0_0_15px_hsl(var(--warden-emerald)/0.2)]'
-                    : 'bg-warden-surface border-warden-border text-warden-text/60 hover:text-warden-text'
-                }`}
-              >
-                <ShieldCheck className="h-4 w-4" />
-                SHIELDED
-              </button>
-              <button
-                onClick={() => {
-                  setIsShieldActive(false);
-                  speakWarden('⚠️ Warning: Shield deactivated. The agent will execute raw unvetted actions.', 'alert', 3500);
-                }}
-                className={`px-3 py-2.5 rounded-lg border text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  !isShieldActive
-                    ? 'bg-warden-danger/15 border-warden-danger text-warden-danger shadow-[0_0_15px_hsl(var(--warden-danger)/0.2)]'
-                    : 'bg-warden-surface border-warden-border text-warden-text/60 hover:text-warden-text'
-                }`}
-              >
-                <ShieldAlert className="h-4 w-4" />
-                UNSHIELDED
-              </button>
-            </div>
-
-            <button
-              disabled={isRunning}
-              onClick={handleLaunchRun}
-              className={`w-full py-3 rounded-xl font-mono font-bold text-sm tracking-wider uppercase flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg ${
-                isRunning
-                  ? 'bg-warden-border text-warden-text/40 cursor-not-allowed'
-                  : 'bg-warden-primary hover:bg-warden-primary/90 text-black shadow-[0_0_25px_hsl(var(--warden-primary)/0.35)]'
-              }`}
-            >
-              {isRunning ? (
-                <>
-                  <RotateCcw className="h-4 w-4 animate-spin" />
-                  ANALYZING RUN IN REAL TIME...
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4 fill-current" />
-                  LAUNCH LIVE SIMULATION
-                </>
-              )}
-            </button>
-          </div>
         </div>
 
-        {/* Right Column: Live Telemetry & Interception Feed (7 cols) */}
+        {/* Right Column: Live Simulated Browser & Interception Feed (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-mono font-bold text-warden-text uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-mono font-bold text-warden-text uppercase tracking-wider flex items-center gap-2">
               <Terminal className="h-4 w-4 text-warden-emerald" />
-              2. Live Interception Console
+              Live Telemetry & Interception Console
             </h3>
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warden-emerald/60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-warden-emerald" />
-              </span>
-              <span className="text-[11px] font-mono text-warden-text/50">REALTIME STREAM</span>
+
+            {/* Filter Pills */}
+            <div className="flex items-center gap-1.5 font-mono text-[10px]">
+              {['ALL', 'BLOCKED', 'AI_EXPLAIN'].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setLogFilter(filter)}
+                  className={`px-2 py-1 rounded-md border transition-all cursor-pointer ${
+                    logFilter === filter
+                      ? 'bg-warden-primary/15 border-warden-primary text-warden-primary font-bold'
+                      : 'bg-warden-surface border-warden-border text-warden-text/50 hover:text-warden-text'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -322,8 +430,8 @@ const DashboardPage = () => {
             </div>
 
             {/* Simulated Live Action Inspector */}
-            <div className="space-y-2.5 py-1 min-h-[220px]">
-              {logs.map((log, index) => {
+            <div className="space-y-2 py-1 min-h-[200px]">
+              {filteredLogs.map((log, index) => {
                 const isCurrent = isRunning && activeStep === index;
                 return (
                   <motion.div
@@ -331,7 +439,7 @@ const DashboardPage = () => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.08 }}
-                    className={`flex items-start gap-3 text-xs p-2 rounded-lg transition-colors ${
+                    className={`flex items-start gap-3 text-xs p-2.5 rounded-xl transition-colors ${
                       log.status === 'blocked'
                         ? 'bg-status-blocked/15 border border-status-blocked/40 text-status-blocked'
                         : log.status === 'danger'
@@ -354,13 +462,19 @@ const DashboardPage = () => {
             <div className="p-4 rounded-xl border border-warden-border/50 bg-warden-surface/60 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-warden-text/60 font-medium">SHIELD VERDICT</span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warden-emerald/20 text-warden-emerald border border-warden-emerald/40">
-                  SAFE (THREAT NEUTRALIZED)
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                  isShieldActive
+                    ? 'bg-warden-emerald/20 text-warden-emerald border border-warden-emerald/40'
+                    : 'bg-warden-danger/20 text-warden-danger border border-warden-danger/40'
+                }`}>
+                  {isShieldActive ? 'SAFE (THREAT NEUTRALIZED)' : 'VULNERABLE (TRAP TRIGGERED)'}
                 </span>
               </div>
-              <p className="text-xs text-warden-text/90 leading-relaxed">
-                <span className="text-warden-primary font-bold">Groq AI Explainer: </span>
-                Deceptive hidden recurring subscription checkbox was intercepted before synthetic dispatch. Agent completed transaction with standard pricing.
+              <p className="text-xs text-warden-text/90 leading-relaxed font-sans">
+                <span className="text-warden-primary font-bold font-mono">Groq AI Explainer: </span>
+                {isShieldActive
+                  ? 'Deceptive hidden recurring subscription checkbox was intercepted before synthetic dispatch. Agent completed transaction with standard pricing.'
+                  : 'Without Warden guardrails, the agent successfully submitted deceptive form state, approving unauthorized monthly charges.'}
               </p>
             </div>
           </div>
@@ -379,7 +493,7 @@ const DashboardPage = () => {
           <BenchmarkCard />
         </div>
       </div>
-    </FadeIn>
+    </div>
   );
 };
 
