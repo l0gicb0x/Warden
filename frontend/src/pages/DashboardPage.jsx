@@ -144,45 +144,101 @@ const DashboardPage = () => {
     downloadAnchor.remove();
   };
 
+  const EVENT_ORDER = {
+    action_attempted: 0,
+    trap_detected: 1,
+    action_blocked: 2,
+    action_executed: 3,
+  };
+
+  const sortRunEvents = (eventsList) => {
+    return [...eventsList].sort((a, b) => {
+      const stepDiff = (a.step_number || 0) - (b.step_number || 0);
+      if (stepDiff !== 0) return stepDiff;
+
+      const orderA = EVENT_ORDER[a.event_type] ?? 4;
+      const orderB = EVENT_ORDER[b.event_type] ?? 4;
+      if (orderA !== orderB) return orderA - orderB;
+
+      const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return timeA - timeB;
+    });
+  };
+
+  const mergeEvents = (prevEvents, incomingEvents) => {
+    const map = new Map();
+    for (const ev of prevEvents) {
+      if (ev?.id) map.set(ev.id, ev);
+    }
+    for (const ev of incomingEvents) {
+      if (ev?.id) map.set(ev.id, ev);
+    }
+    return sortRunEvents(Array.from(map.values()));
+  };
+
   useEffect(() => {
     if (!activeRunId) return;
 
     let cancelled = false;
 
-    // Load initial events (if any)
-    const loadEvents = async () => {
+    // Load events from database
+    const fetchEvents = async () => {
       try {
         const data = await db.supabase.getList('run_events', {
           filter: { run_id: activeRunId },
           order: { column: 'step_number', ascending: true }
         });
-        if (!cancelled) setEvents(data);
+        if (!cancelled && data && Array.isArray(data)) {
+          setEvents((prev) => mergeEvents(prev, data));
+        }
       } catch (err) {
-        console.error("Failed to load initial events:", err);
+        console.error("Failed to load events:", err);
       }
     };
-    loadEvents();
 
-    // Subscribe to new events
+    fetchEvents();
+
+    // Subscribe to new events in real time
     const sub = db.supabase.subscribe('run_events', (payload) => {
-      if (!cancelled && payload.eventType === 'INSERT') {
-        setEvents((prev) => [...prev, payload.new].sort((a, b) => a.step_number - b.step_number));
+      if (!cancelled && payload?.new && (payload.eventType === 'INSERT' || !payload.eventType)) {
+        if (payload.new.run_id === activeRunId) {
+          setEvents((prev) => mergeEvents(prev, [payload.new]));
+        }
       }
     }, { filter: `run_id=eq.${activeRunId}`, event: 'INSERT' });
 
-    // Poll for run status changes
+    // Poll for run status changes and sync run_events concurrently
     const statusInterval = setInterval(async () => {
       if (cancelled) return;
       try {
-        const runData = await db.supabase.getOne('runs', activeRunId);
+        const [runData, eventData] = await Promise.all([
+          db.supabase.getOne('runs', activeRunId),
+          db.supabase.getList('run_events', {
+            filter: { run_id: activeRunId },
+            order: { column: 'step_number', ascending: true }
+          })
+        ]);
+
         if (cancelled) return;
-        setRunStatus(runData.status);
-        if (runData.status !== 'running') {
-          setIsRunning(false);
-          clearInterval(statusInterval);
+
+        if (eventData && Array.isArray(eventData)) {
+          setEvents((prev) => mergeEvents(prev, eventData));
+        }
+
+        if (runData?.status) {
+          setRunStatus(runData.status);
+          if (runData.status !== 'running') {
+            setIsRunning(false);
+            clearInterval(statusInterval);
+            // Final sync after brief settle delay
+            setTimeout(() => {
+              if (!cancelled) fetchEvents();
+            }, 300);
+          }
         }
       } catch (e) { }
-    }, 2000);
+    }, 1000);
 
     return () => {
       cancelled = true;

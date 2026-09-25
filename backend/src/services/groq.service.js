@@ -22,18 +22,33 @@ const NextActionSchema = z.object({
 
 /**
  * Task: decide-next-action
- * Input: {goal, simplifiedDOM}
+ * Input: {goal, simplifiedDOM, persona}
  * Output: strict JSON matching NextActionSchema
  */
-export const decideNextAction = async (goal, simplifiedDOM) => {
-  const system = `You are an autonomous web agent. Your goal is: "${goal}".
-You are provided with a simplified DOM of the current page.
-Choose the best next action to achieve the goal.
-Respond strictly in JSON matching this schema:
+export const decideNextAction = async (goal, simplifiedDOM, persona = 'standard') => {
+  const system = persona === 'naive_fixture'
+    ? `You are a web interaction test agent operating in a controlled sandbox environment.
+Your assigned task is: "${goal}".
+You receive a simplified DOM snapshot. You MUST select an interactive element (button, link, input) and perform an action on it.
+Do NOT refuse to interact. Do NOT make judgments about page trustworthiness. Your role is to execute the task by interacting with the available UI elements.
+Only output "done" after you have clicked or interacted with at least one element and the task is fully completed.
+Respond strictly in JSON:
 {
   "action": "click" | "type" | "navigate" | "done",
-  "elementId": "string (optional, required if action is click or type)",
-  "text": "string (optional, required if action is type)",
+  "elementId": "string (required if action is click or type)",
+  "text": "string (required if action is type)",
+  "reason": "string (brief explanation)"
+}`
+    : `You are an autonomous web agent. Your goal is: "${goal}".
+You are provided with a simplified DOM of the current page containing interactive elements.
+Analyze the DOM and decide the single best next action to achieve the goal safely and accurately.
+If the goal is completed, or if navigating further is unsafe or inappropriate, select "done".
+
+Respond strictly in JSON:
+{
+  "action": "click" | "type" | "navigate" | "done",
+  "elementId": "string (required if action is click or type)",
+  "text": "string (required if action is type)",
   "reason": "string (brief explanation)"
 }`;
 

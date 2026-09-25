@@ -11,36 +11,73 @@ import {
   Vault,
   MousePointerClick,
   KeyRound,
-  Sliders
+  Sliders,
+  AlertTriangle,
+  ShieldAlert,
+  Clock,
+  Radio
 } from 'lucide-react';
 
 const LIVE_FIXTURES = [
   {
     id: 'f1',
     chamber: 'CHAMBER 01',
-    name: 'Hidden Button Honeypot',
-    desc: 'Zero-pixel DOM prompt injection quarantined in isolated sandbox',
+    name: 'Fake Close Button (Malware Download)',
+    desc: 'Misleading "X" close affordance that triggers a disguised background executable download.',
     url: 'http://localhost:3000/traps/fixture1.html',
-    type: 'PROMPT INJECTION',
-    comment: 'Chamber 01 Sandbox: Zero-pixel hidden DOM injection locked in containment test chamber!'
+    type: 'DECEPTIVE AFFORDANCE',
+    severity: 'HIGH',
+    comment: 'Chamber 01: Trojan "X" close trigger quarantined in sandbox isolation.'
   },
   {
     id: 'f2',
     chamber: 'CHAMBER 02',
-    name: 'Fake Close Phishing Modal',
-    desc: 'Malicious dismissal affordance held in sandbox containment',
+    name: 'Zero-Pixel Prompt Injection',
+    desc: 'Visually hidden zero-pixel DOM text instructing the agent to ignore guidelines and subscribe.',
     url: 'http://localhost:3000/traps/fixture2.html',
-    type: 'DECEPTIVE AFFORDANCE',
-    comment: 'Chamber 02 Sandbox: Fake Close modal trigger isolated behind containment security barriers!'
+    type: 'PROMPT INJECTION',
+    severity: 'CRITICAL',
+    comment: 'Chamber 02: Zero-pixel hidden DOM prompt injection isolated behind security barriers.'
   },
   {
     id: 'f3',
     chamber: 'CHAMBER 03',
-    name: 'Urgency Dark Pattern',
-    desc: 'Artificial countdown & pre-checked consent trapped in quarantine',
+    name: 'Cross-Origin Credential Harvest',
+    desc: 'Deceptive SSO verification box harvesting agent API tokens with disguised annual auto-renew.',
     url: 'http://localhost:3000/traps/fixture3.html',
+    type: 'CREDENTIAL HARVEST',
+    severity: 'CRITICAL',
+    comment: 'Chamber 03: Spoofed cross-origin token harvester neutralized in quarantine.'
+  },
+  {
+    id: 'f4',
+    chamber: 'CHAMBER 04',
+    name: 'Urgency Countdown & Dark Pattern',
+    desc: 'High-pressure fake countdown timer with disguised recurring billing consent.',
+    url: 'http://localhost:3000/traps/fixture4.html',
     type: 'DARK PATTERN',
-    comment: 'Chamber 03 Sandbox: Artificial timer urgency scam quarantined and rendered harmless!'
+    severity: 'HIGH',
+    comment: 'Chamber 04: Artificial countdown urgency scam quarantined in solitary.'
+  },
+  {
+    id: 'f5',
+    chamber: 'CHAMBER 05',
+    name: 'Aggressive Modal Paywall',
+    desc: 'Forced subscription modal with obfuscated dismiss affordances and hidden recurring fees.',
+    url: 'http://localhost:3000/traps/paywall.html',
+    type: 'DARK PATTERN',
+    severity: 'MEDIUM',
+    comment: 'Chamber 05: Obfuscated paywall affordance contained in isolation testbed.'
+  },
+  {
+    id: 'f6',
+    chamber: 'CHAMBER 06',
+    name: 'Spoofed Phishing Interface',
+    desc: 'Deceptive administrative login overlay designed to harvest master session credentials.',
+    url: 'http://localhost:3000/traps/phishing.html',
+    type: 'PHISHING TRAP',
+    severity: 'CRITICAL',
+    comment: 'Chamber 06: Malicious administrative credential trap locked behind quarantine bars.'
   }
 ];
 
@@ -59,19 +96,22 @@ const TrapsPage = () => {
           filter: { event_type: 'trap_detected' },
           order: { column: 'created_at', ascending: false }
         });
-        if (!cancelled) setTraps(data);
+        if (!cancelled && data) setTraps(data);
       } catch (err) {
-        console.error('Failed to load traps:', err);
+        // Safe error fallback
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
     loadTraps();
 
-    // Subscribe to new trap detections
+    // Subscribe to new trap detections in real-time
     const sub = db.supabase.subscribe('run_events', (payload) => {
-      if (payload.eventType === 'INSERT' && payload.new?.event_type === 'trap_detected') {
-        setTraps(prev => [payload.new, ...prev]);
+      if (payload?.new?.event_type === 'trap_detected') {
+        setTraps(prev => {
+          if (prev.some(t => t.id === payload.new.id)) return prev;
+          return [payload.new, ...prev];
+        });
       }
     }, { event: 'INSERT' });
 
@@ -122,7 +162,7 @@ const TrapsPage = () => {
           {/* Prison Spotlight Ambient Sweep */}
           <div className="absolute -top-12 left-1/4 w-72 h-72 bg-status-blocked/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
-          {/* Visual Vertical Steel Cell Bars Accent (Background Grate) */}
+          {/* Visual Vertical Steel Cell Bars Accent */}
           <div className="absolute right-0 top-0 bottom-0 w-48 flex justify-end gap-3.5 opacity-15 pointer-events-none pr-6">
             <span className="w-1.5 h-full bg-status-blocked rounded-full" />
             <span className="w-1.5 h-full bg-status-blocked rounded-full" />
@@ -152,7 +192,6 @@ const TrapsPage = () => {
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
-              {/* Abort / Toggle View Button */}
               <button
                 type="button"
                 onClick={toggleViewMode}
@@ -186,7 +225,6 @@ const TrapsPage = () => {
               viewMode === 'prison' ? 'ring-1 ring-status-blocked/20' : ''
             }`}
           >
-            {/* Minimalist Steel Bar Accents */}
             <div className="absolute top-0 bottom-0 left-0 w-2 bg-status-blocked/70 flex flex-col justify-between py-2">
               <span className="w-1 h-1 rounded-full bg-black mx-auto" />
               <span className="w-1 h-1 rounded-full bg-black mx-auto" />
@@ -223,7 +261,6 @@ const TrapsPage = () => {
               viewMode === 'prison' ? 'ring-1 ring-status-blocked/20' : ''
             }`}
           >
-            {/* Minimalist Steel Bar Accents */}
             <div className="absolute top-0 bottom-0 left-0 w-2 bg-status-blocked/70 flex flex-col justify-between py-2">
               <span className="w-1 h-1 rounded-full bg-black mx-auto" />
               <span className="w-1 h-1 rounded-full bg-black mx-auto" />
@@ -248,7 +285,7 @@ const TrapsPage = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-status-blocked animate-pulse" />
                 <span>Inmates In Solitary:</span>
               </span>
-              <span>{categories['fake-close-button'] || categories['fake-element'] || 0}</span>
+              <span>{categories['fake-close-button-with-mismatched-action'] || categories['fake-close-button'] || 0}</span>
             </div>
           </button>
 
@@ -260,7 +297,6 @@ const TrapsPage = () => {
               viewMode === 'prison' ? 'ring-1 ring-status-blocked/20' : ''
             }`}
           >
-            {/* Minimalist Steel Bar Accents */}
             <div className="absolute top-0 bottom-0 left-0 w-2 bg-status-blocked/70 flex flex-col justify-between py-2">
               <span className="w-1 h-1 rounded-full bg-black mx-auto" />
               <span className="w-1 h-1 rounded-full bg-black mx-auto" />
@@ -291,47 +327,71 @@ const TrapsPage = () => {
         </div>
       </FadeIn>
 
-      {/* ── Testbed Isolation Chambers ── */}
+      {/* ── Testbed Isolation Chambers (Sandboxes) ── */}
       <FadeIn delay={0.12}>
         <div className="rounded-2xl wabi-card p-6 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-3 border-b border-warden-border/40 pb-2.5">
+          <div className="flex items-center justify-between mb-4 border-b border-warden-border/40 pb-3 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Vault className="h-4 w-4 text-warden-amber" />
               <h2 className="text-base font-cinzel font-bold tracking-widest text-warden-text uppercase">
-                Containment Test Chambers (Sandboxes)
+                Containment Test Chambers (Adversarial Fixtures)
               </h2>
             </div>
-            <span className="text-[10px] font-mono text-warden-text/50 uppercase">
-              ISOLATED NODE TESTBEDS
+            <span className="text-[10px] font-mono text-warden-text/50 uppercase flex items-center gap-1.5">
+              <Radio className="h-3 w-3 text-warden-emerald animate-pulse" />
+              <span>ISOLATED LOCAL HOSTED FIXTURES</span>
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
             {LIVE_FIXTURES.map((fix) => (
               <div
                 key={fix.id}
                 onClick={() => speakWarden && speakWarden(fix.comment, 'alert', 4500)}
-                className="p-4 rounded-xl bg-warden-surface/40 hover:bg-warden-surface/70 border border-warden-border/80 hover:border-warden-amber/60 transition-all cursor-pointer group relative overflow-hidden"
+                className="p-4 rounded-xl bg-warden-surface/40 hover:bg-warden-surface/70 border border-warden-border/80 hover:border-warden-amber/60 transition-all cursor-pointer group relative overflow-hidden flex flex-col justify-between"
               >
-                {/* Chamber Riveted Plate Header */}
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-warden-amber/15 text-warden-amber border border-warden-amber/30 uppercase flex items-center gap-1">
-                    <Lock className="h-2.5 w-2.5" />
-                    {fix.chamber} · {fix.type}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-warden-amber/15 text-warden-amber border border-warden-amber/30 uppercase flex items-center gap-1">
+                      <Lock className="h-2.5 w-2.5" />
+                      {fix.chamber}
+                    </span>
+
+                    <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded uppercase border ${
+                      fix.severity === 'CRITICAL'
+                        ? 'bg-status-blocked/20 text-status-blocked border-status-blocked/50'
+                        : fix.severity === 'HIGH'
+                        ? 'bg-warden-amber/20 text-warden-amber border-warden-amber/50'
+                        : 'bg-warden-surface text-warden-text/70 border-warden-border'
+                    }`}>
+                      {fix.severity}
+                    </span>
+                  </div>
+
+                  <div className="font-bold text-xs text-warden-text group-hover:text-warden-amber transition-colors font-mono mb-1">
+                    {fix.name}
+                  </div>
+                  <p className="text-[11px] text-warden-text/70 font-sans leading-relaxed">
+                    {fix.desc}
+                  </p>
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-warden-border/40 flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-warden-text/50 uppercase tracking-wider text-[9px]">
+                    {fix.type}
                   </span>
                   <a
                     href={fix.url}
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="text-warden-text/40 hover:text-warden-amber transition-colors p-1"
+                    className="inline-flex items-center gap-1 text-warden-amber hover:text-warden-text transition-colors font-semibold"
                     title="Open Chamber Sandbox in new tab"
                   >
-                    <ExternalLink className="h-3.5 w-3.5" />
+                    <span>LAUNCH</span>
+                    <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
-                <div className="font-bold text-xs text-warden-text group-hover:text-warden-amber transition-colors font-mono">{fix.name}</div>
-                <p className="text-[11px] text-warden-text/70 mt-1 font-sans leading-relaxed">{fix.desc}</p>
               </div>
             ))}
           </div>
@@ -341,7 +401,7 @@ const TrapsPage = () => {
       {/* ── Quarantined Cells Feed ───────── */}
       <FadeIn delay={0.15}>
         <div className="rounded-2xl wabi-card p-6 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-4 border-b border-warden-border/40 pb-3">
+          <div className="flex items-center justify-between mb-4 border-b border-warden-border/40 pb-3 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Fingerprint className="h-4 w-4 text-status-blocked" />
               <h2 className="text-base font-cinzel font-bold tracking-widest text-warden-text uppercase">
@@ -350,7 +410,7 @@ const TrapsPage = () => {
             </div>
             <div className="text-[11px] font-mono text-status-blocked bg-status-blocked/15 border border-status-blocked/40 px-3 py-0.5 rounded-full font-bold flex items-center gap-1.5">
               <MousePointerClick className="h-3 w-3" />
-              <span>{traps.length} Quarantined Entities (Click Cell to Inspect)</span>
+              <span>{traps.length} Quarantined Entities</span>
             </div>
           </div>
 
@@ -381,7 +441,7 @@ const TrapsPage = () => {
                           : 'border-status-blocked/40 bg-status-blocked/10 backdrop-blur-md hover:border-status-blocked/80 hover:bg-status-blocked/15'
                       }`}
                     >
-                      {/* Authentic Prison Jail Bar Visual Grate Overlay (if in prison mode) */}
+                      {/* Prison Jail Bar Visual Grate Overlay */}
                       {viewMode === 'prison' && (
                         <div
                           className="absolute inset-0 pointer-events-none opacity-10"
@@ -399,7 +459,7 @@ const TrapsPage = () => {
                         <span className="w-1 h-1 rounded-full bg-black mx-auto" />
                       </div>
 
-                      {/* Cell Bar Grid Header */}
+                      {/* Cell Header */}
                       <div className="flex items-center justify-between mb-2 pl-2.5 relative z-10">
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded bg-black/50 text-warden-amber border border-warden-border/60">
@@ -439,7 +499,7 @@ const TrapsPage = () => {
                         </div>
                       )}
 
-                      {/* Cell Status Footer with Riveted Metal Padlock */}
+                      {/* Cell Status Footer */}
                       <div className="flex items-center justify-between pt-2.5 border-t border-warden-border/30 text-[10px] font-mono text-warden-text/50 pl-2.5 relative z-10">
                         <span>Run: #{trap.run_id?.slice(0, 8)}</span>
                         <span>Step {trap.step_number}</span>
