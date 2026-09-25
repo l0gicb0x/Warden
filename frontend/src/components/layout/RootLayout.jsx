@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Navbar from './Navbar';
 import SentinelCompanion from '@/components/common/SentinelCompanion';
+import ShieldAuraBackground from '@/components/common/ShieldAuraBackground';
 
 /**
  * RootLayout — top-level shell wrapping all routed pages.
@@ -10,7 +11,10 @@ import SentinelCompanion from '@/components/common/SentinelCompanion';
  */
 const RootLayout = () => {
   return (
-    <div className="relative min-h-dvh flex flex-col bg-warden-bg">
+    <div className="relative min-h-dvh flex flex-col bg-warden-bg text-warden-text overflow-x-hidden">
+      {/* Ambient Swimming Pool Grid & Fluid Plasma Aura Background */}
+      <ShieldAuraBackground />
+
       {/* Global toast container — top-right, dark themed */}
       <Toaster
         position="top-right"
@@ -28,7 +32,7 @@ const RootLayout = () => {
       <SentinelCompanion />
 
       {/* Main content area */}
-      <main className="flex-1 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="relative z-10 flex-1 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Outlet />
       </main>
     </div>
