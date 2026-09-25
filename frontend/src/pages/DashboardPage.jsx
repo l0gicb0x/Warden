@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import FadeIn from '@/components/motion/FadeIn';
 import PixelHeroDissolve from '@/components/common/PixelHeroDissolve';
 import { db } from '@/lib/dataProvider';
@@ -222,18 +223,25 @@ const DashboardPage = () => {
     : (runStatus === 'completed' ? 'allowed' : null);
 
   const consoleContentRef = useRef(null);
+  const location = useLocation();
 
-  // Auto-locate directly at Dashboard Console when navigating from other pages
+  // Smart scroll behavior:
+  // 1. On fresh page load / top arrival: stay at top (0) so logo reveal is front & center.
+  // 2. When navigating from other pages or with '?view=console': scroll smoothly to console.
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const wantsConsole = params.get('view') === 'console';
     const hasVisited = sessionStorage.getItem('warden_has_visited');
-    if (hasVisited) {
+
+    if (wantsConsole) {
       setTimeout(() => {
         consoleContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 40);
-    } else {
+      }, 50);
+    } else if (!hasVisited) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
       sessionStorage.setItem('warden_has_visited', 'true');
     }
-  }, []);
+  }, [location.search]);
 
   return (
     <div className="space-y-6">
