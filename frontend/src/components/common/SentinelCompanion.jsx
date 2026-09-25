@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Sparkles, AlertTriangle, Zap, Terminal, Heart, Navigation, Move, Compass, CheckCircle2, WifiOff, Wifi } from 'lucide-react';
+import { Shield, Sparkles, AlertTriangle, Heart, Compass, CheckCircle2, WifiOff } from 'lucide-react';
 import { db } from '@/lib/dataProvider';
-import { useTheme } from '@/context/ThemeContext';
 
 /**
  * Global helper to trigger short Warden speech from any component / click handler
@@ -17,19 +16,17 @@ export const speakWarden = (text, emo = 'curious', durationMs = 3800) => {
 /**
  * SentinelCompanion — "Warden"
  * ─────────────────────────────────────────────────────────────
- * Autonomous cybernetic bodyguard companion bot:
+ * Autonomous cybernetic companion bot:
  * 1. Immediate wholesome introduction when opening the app.
  * 2. Reacts to clicks on tabs, presets, sessions, and trap cards with short witty commentary.
  * 3. Glides down along with page scroll on homepage and explains the live telemetry stream.
  * 4. Enters from the LEFT side when navigating to the Runs tab.
  * 5. Enters from the RIGHT side when navigating to the Traps tab.
  * 6. Slower, ultra-graceful roaming algorithm across the entire screen (7.5s smooth bezier glides).
- * 7. Dynamic theme-aware palette (Ceramic Bone Porcelain in Light Mode, Obsidian & Amber in Dark Mode).
- * 8. Actively monitors runtime errors, unhandled rejections, and network connectivity.
- * 9. Instant 1-to-1 effortless pointer dragging across the entire viewport.
+ * 7. Actively monitors runtime errors, unhandled rejections, and network connectivity.
+ * 8. Instant 1-to-1 effortless pointer dragging across the entire viewport.
  */
 const SentinelCompanion = () => {
-  const { theme, isDark } = useTheme();
   const location = useLocation();
   const pathname = location.pathname;
   const prevPathnameRef = useRef(pathname);
@@ -38,7 +35,6 @@ const SentinelCompanion = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isFreeRoaming, setIsFreeRoaming] = useState(true);
   const [hasDepartedLogo, setHasDepartedLogo] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
 
   // Viewport position in pixels (prominently visible floating sentry)
   const [pos, setPos] = useState(() => {
@@ -55,7 +51,7 @@ const SentinelCompanion = () => {
   
   // Guaranteed initial introduction speech
   const [speech, setSpeech] = useState(
-    "👋 Hi! I'm Warden, your AI bodyguard! ✨ I'm on patrol watching your back — click anything or scroll down to explore!"
+    "👋 Hi! I'm Warden, your little AI bodyguard! ✨ I'm on patrol watching your back — click anything or scroll down to explore!"
   );
   const [emotion, setEmotion] = useState('happy'); // 'idle' | 'curious' | 'scared' | 'happy' | 'alert'
   const [pokeCount, setPokeCount] = useState(0);
@@ -167,9 +163,9 @@ const SentinelCompanion = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScroll = window.scrollY;
-      setScrollY(currentScroll);
 
       if (pathname === '/') {
+        // When user scrolls down past 60px on homepage, swoop down and explain the page
         if (currentScroll > 60 && !hasDepartedLogo) {
           setHasDepartedLogo(true);
           const targetX = Math.round(window.innerWidth > 768 ? window.innerWidth * 0.70 : window.innerWidth * 0.45);
@@ -177,160 +173,262 @@ const SentinelCompanion = () => {
           setPos({ x: targetX, y: targetY });
           playRoboChirp('happy');
           showSpeechBubble(
-            "⚡ Down into the telemetry matrix! I'm scanning live agent runs and inspecting DOM traps in real time.",
-            'curious',
-            5000
+            "🛡️ Live Interception Console: Here you can watch agent telemetry in real-time while I actively intercept and block deceptive traps!",
+            'happy',
+            5500
           );
+        } else if (currentScroll <= 15 && hasDepartedLogo && !isDragging) {
+          // Smoothly return to perched position
+          setHasDepartedLogo(false);
+          setPos({ x: 36, y: 16 });
+          setTilt(0);
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [pathname, hasDepartedLogo, playRoboChirp, showSpeechBubble]);
+  }, [hasDepartedLogo, pathname, isDragging, showSpeechBubble, playRoboChirp]);
 
-  // Autonomous Roaming Logic
+  // Page Navigation Entrances (Left for /runs, Right for /traps)
+  useEffect(() => {
+    if (prevPathnameRef.current === pathname) return;
+    prevPathnameRef.current = pathname;
+
+    setHasDepartedLogo(true);
+    playRoboChirp('chirp');
+
+    if (pathname === '/runs') {
+      // Swoop in gracefully from the LEFT side of the screen
+      const screenW = typeof window !== 'undefined' ? window.innerWidth : 1000;
+      setPos({ x: -70, y: 180 });
+      setTilt(18);
+
+      setTimeout(() => {
+        setPos({ x: Math.min(100, screenW * 0.15), y: 220 });
+        setTilt(0);
+        showSpeechBubble(
+          '📋 Forensic Run Ledger: Review historical test sessions, audit step-by-step agent decisions, and security scores.',
+          'curious',
+          5000
+        );
+      }, 100);
+    } else if (pathname === '/traps') {
+      // Swoop in gracefully from the RIGHT side of the screen
+      const screenW = typeof window !== 'undefined' ? window.innerWidth : 1000;
+      setPos({ x: screenW + 70, y: 180 });
+      setTilt(-18);
+
+      setTimeout(() => {
+        setPos({ x: Math.max(screenW - 200, screenW * 0.75), y: 230 });
+        setTilt(0);
+        showSpeechBubble(
+          '🍯 Honeypot Matrix: Live adversarial trap fixtures (hidden DOM, sneaky buttons, prompt injections) testing agent defenses!',
+          'alert',
+          5000
+        );
+      }, 100);
+    } else if (pathname.startsWith('/runs/')) {
+      showSpeechBubble(
+        '🔍 Deep Run Inspection: Analyzing step breakdown, prompt payloads, and intercepted trap triggers.',
+        'curious',
+        4500
+      );
+    } else if (pathname === '/') {
+      if (window.scrollY > 60) {
+        showSpeechBubble(
+          '🛡️ Live Interception Console: Telemetry feeds and active defense shields synchronized.',
+          'happy',
+          4500
+        );
+      }
+    }
+  }, [pathname, showSpeechBubble, playRoboChirp]);
+
+  // Slower, Ultra-Smooth Roaming Waypoint Generator (every 9s with 7.5s transition)
   const glideToNewWaypoint = useCallback(() => {
-    if (isDragging || isInteractingRef.current || typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || isInteractingRef.current || !hasDepartedLogo) return;
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const isMobile = width < 768;
-
-    const minX = isMobile ? 16 : 80;
-    const maxX = isMobile ? width - 80 : width - 140;
-    const minY = 75;
-    const maxY = Math.min(height - 100, 720);
-
-    const nextX = Math.floor(minX + Math.random() * (maxX - minX));
-    const nextY = Math.floor(minY + Math.random() * (maxY - minY));
+    const pad = 70;
+    const botW = 80;
+    const botH = 80;
+    const minX = pad;
+    const maxX = Math.max(minX + 120, window.innerWidth - botW - pad);
+    const minY = pad + 30;
+    const maxY = Math.max(minY + 120, window.innerHeight - botH - pad);
 
     setPos((current) => {
-      const deltaX = nextX - current.x;
-      const calculatedTilt = Math.max(-14, Math.min(14, deltaX * 0.035));
-      setTilt(calculatedTilt);
+      const nextX = Math.round(minX + Math.random() * (maxX - minX));
+      const nextY = Math.round(minY + Math.random() * (maxY - minY));
+
+      const dx = nextX - current.x;
+      const bankingAngle = Math.max(-12, Math.min(12, dx * 0.025));
+      setTilt(bankingAngle);
+
       return { x: nextX, y: nextY };
     });
+  }, [hasDepartedLogo]);
 
-    const resetTiltTimer = setTimeout(() => {
-      setTilt(0);
-    }, 4000);
-
-    return () => clearTimeout(resetTiltTimer);
-  }, [isDragging]);
-
-  // Route Navigation Reactions: Swoop in from different directions per tab!
+  // Slower autonomous cruising cycle (9 seconds per waypoint)
   useEffect(() => {
-    if (prevPathnameRef.current !== pathname) {
-      setHasDepartedLogo(true);
-      const isMobile = window.innerWidth < 768;
+    if (!isFreeRoaming || isDragging || !hasDepartedLogo) return;
 
-      if (pathname === '/runs') {
-        setPos({ x: isMobile ? 24 : 90, y: Math.min(window.innerHeight * 0.4, 260) });
-        setTilt(-12);
-        playRoboChirp('chirp');
-        showSpeechBubble(
-          '📂 Welcome to the Runs Vault! Here we log autonomous agent execution sessions and intercept anomalies.',
-          'happy',
-          4500
-        );
-      } else if (pathname === '/traps') {
-        const targetX = Math.round(isMobile ? window.innerWidth - 100 : window.innerWidth - 280);
-        setPos({ x: targetX, y: Math.min(window.innerHeight * 0.38, 240) });
-        setTilt(12);
-        playRoboChirp('alarm');
-        showSpeechBubble(
-          '🚨 Maximum Security Detention Ward! Deceptive trap fixtures are contained behind high-voltage security bars.',
-          'alert',
-          4800
-        );
-      } else if (pathname === '/') {
-        setPos({ x: isMobile ? window.innerWidth - 140 : window.innerWidth - 300, y: 110 });
-        setTilt(0);
-        playRoboChirp('happy');
-        showSpeechBubble(
-          '🛡️ Mission Control Dashboard: Toggle between Shielded & Unshielded modes to see live protection.',
-          'happy',
-          4500
-        );
-      }
+    roamTimerRef.current = setInterval(() => {
+      glideToNewWaypoint();
+    }, 9000);
 
-      const t = setTimeout(() => setTilt(0), 1200);
-      prevPathnameRef.current = pathname;
-      return () => clearTimeout(t);
-    }
-  }, [pathname, playRoboChirp, showSpeechBubble]);
+    return () => {
+      if (roamTimerRef.current) clearInterval(roamTimerRef.current);
+    };
+  }, [isFreeRoaming, isDragging, hasDepartedLogo, glideToNewWaypoint]);
 
-  // Periodic Free Roaming
-  useEffect(() => {
-    if (!isFreeRoaming) return;
-
-    const interval = setInterval(() => {
-      if (!isDragging && !isHovered && !isInteractingRef.current) {
-        glideToNewWaypoint();
-      }
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [isFreeRoaming, isDragging, isHovered, glideToNewWaypoint]);
-
-  // Pointer Drag-and-Drop Handling
+  // 1-to-1 Fluid Pointer Drag Handlers
   const handlePointerDown = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     isInteractingRef.current = true;
-    setIsDragging(true);
     setHasDepartedLogo(true);
-
-    const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX);
-    const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY);
+    setIsDragging(true);
+    setEmotion('happy');
+    playRoboChirp('chirp');
 
     dragStartOffsetRef.current = {
-      x: clientX - pos.x,
-      y: clientY - pos.y,
+      x: e.clientX - pos.x,
+      y: e.clientY - pos.y,
     };
 
-    const handlePointerMove = (moveEvent) => {
-      const curX = moveEvent.clientX ?? (moveEvent.touches && moveEvent.touches[0]?.clientX);
-      const curY = moveEvent.clientY ?? (moveEvent.touches && moveEvent.touches[0]?.clientY);
-      if (curX === undefined || curY === undefined) return;
+    const handlePointerMove = (moveEvt) => {
+      const currentX = moveEvt.clientX - dragStartOffsetRef.current.x;
+      const currentY = moveEvt.clientY - dragStartOffsetRef.current.y;
 
-      const nextX = Math.max(10, Math.min(window.innerWidth - 70, curX - dragStartOffsetRef.current.x));
-      const nextY = Math.max(10, Math.min(window.innerHeight - 70, curY - dragStartOffsetRef.current.y));
+      const boundedX = Math.max(15, Math.min(window.innerWidth - 85, currentX));
+      const boundedY = Math.max(15, Math.min(window.innerHeight - 85, currentY));
 
-      setPos((prev) => {
-        const delta = nextX - prev.x;
-        setTilt(Math.max(-25, Math.min(25, delta * 0.6)));
-        return { x: nextX, y: nextY };
-      });
+      const dx = moveEvt.movementX || 0;
+      setTilt(Math.max(-20, Math.min(20, dx * 1.5)));
+      setPos({ x: boundedX, y: boundedY });
     };
 
     const handlePointerUp = () => {
-      setIsDragging(false);
-      setTilt(0);
-      playRoboChirp('chirp');
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
+      setIsDragging(false);
+      setTilt(0);
+
       setTimeout(() => {
         isInteractingRef.current = false;
-      }, 1000);
+      }, 3000);
     };
 
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
   };
 
-  // Track theme changes for contextual Warden commentary
-  const prevThemeRef = useRef(theme);
+  // Global Error & Health Monitoring Listeners
   useEffect(() => {
-    if (prevThemeRef.current && prevThemeRef.current !== theme) {
-      if (isDark) {
-        showSpeechBubble("🌙 Nocturne mode active! Smoked obsidian chassis & kintsugi gold armor engaged.", "happy", 3500);
-      } else {
-        showSpeechBubble("☀️ Travertine Linen mode active! Bone porcelain & gilded bronze armor engaged.", "happy", 3500);
-      }
+    const handleGlobalError = (event) => {
+      const errorMsg = event?.message || 'Uncaught runtime error detected';
+      setRecentErrors((prev) => [...prev.slice(-4), { type: 'Runtime Error', msg: errorMsg, time: Date.now() }]);
+      playRoboChirp('alarm');
+      showSpeechBubble(`⚠️ Error Alert: "${errorMsg.slice(0, 75)}" — Check dev console!`, 'scared', 5500);
+    };
+
+    const handleUnhandledRejection = (event) => {
+      const reason = event?.reason?.message || (typeof event?.reason === 'string' ? event.reason : 'Async promise rejected');
+      setRecentErrors((prev) => [...prev.slice(-4), { type: 'Async Rejection', msg: reason, time: Date.now() }]);
+      playRoboChirp('alarm');
+      showSpeechBubble(`⚠️ Async Error: "${reason.slice(0, 75)}"`, 'scared', 5500);
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      playRoboChirp('alarm');
+      showSpeechBubble('⚠️ Network Offline: Telemetry feed disconnected!', 'alert', 5000);
+    };
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      playRoboChirp('happy');
+      showSpeechBubble('✓ Connection Restored: Live stream synchronized!', 'happy', 4000);
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [playRoboChirp, showSpeechBubble]);
+
+  // Realtime Supabase Threat Event Listener
+  useEffect(() => {
+    let sub = null;
+    try {
+      sub = db.supabase.subscribe('run_events', (payload) => {
+        if (payload?.new) {
+          const evt = payload.new;
+          if (evt.event_type === 'trap_detected' || evt.event_type === 'action_blocked') {
+            playRoboChirp('alarm');
+            if (typeof window !== 'undefined') {
+              setHasDepartedLogo(true);
+              setPos({
+                x: Math.round(window.innerWidth / 2 - 35),
+                y: Math.round(window.innerHeight / 3),
+              });
+            }
+            showSpeechBubble('⚠️ TRAP INTERCEPTED! Deceptive DOM mutation blocked in real-time!', 'scared', 5000);
+          } else if (evt.event_type === 'action_executed') {
+            showSpeechBubble('✓ Clean action dispatched. Threat neutralized!', 'happy', 3200);
+          }
+        }
+      });
+    } catch (e) {}
+
+    return () => {
+      if (sub && sub.unsubscribe) sub.unsubscribe();
+    };
+  }, [showSpeechBubble, playRoboChirp]);
+
+  // Click interaction: 360 flip + contextual health status report
+  const handlePoke = (e) => {
+    e.stopPropagation();
+    if (isDragging) return;
+    playRoboChirp('flip');
+    setFlipDegree((prev) => prev + 360);
+    const next = pokeCount + 1;
+    setPokeCount(next);
+
+    const errorCount = recentErrors.length;
+    const healthStatus = errorCount === 0 ? '✓ Nominal (0 Errors)' : `⚠️ Alert (${errorCount} Errors)`;
+
+    const responses = [
+      { text: `📊 System Report: ${healthStatus} | Telemetry: ${isOnline ? 'Online' : 'Offline'} | Page: ${pathname}`, emo: errorCount === 0 ? 'happy' : 'scared' },
+      { text: "WHOOSH! 360° aerial loop-de-loop! ✦", emo: 'happy' },
+      { text: "You can drag and fly me anywhere around your screen!", emo: 'curious' },
+      { text: `🛡️ Warden bodyguard on patrol! ${errorCount === 0 ? 'Zero errors detected. All systems clear!' : `${errorCount} recent runtime errors logged.`}`, emo: errorCount === 0 ? 'happy' : 'alert' },
+      { text: "Double-click me to toggle Free Roam vs Hover Mode!", emo: 'curious' },
+    ];
+    showSpeechBubble(responses[next % responses.length].text, responses[next % responses.length].emo, 4000);
+  };
+
+  const toggleRoamMode = (e) => {
+    if (e) e.stopPropagation();
+    playRoboChirp('roam');
+    const next = !isFreeRoaming;
+    setIsFreeRoaming(next);
+    if (!next) {
+      showSpeechBubble('Hover Mode: Holding coordinates in place.', 'idle', 2800);
+    } else {
+      setHasDepartedLogo(true);
+      showSpeechBubble('✦ Free Roam ACTIVE! Exploring viewport...', 'happy', 3200);
+      glideToNewWaypoint();
     }
-    prevThemeRef.current = theme;
-  }, [theme, isDark, showSpeechBubble]);
+  };
 
   const isNearRight = typeof window !== 'undefined' ? pos.x > window.innerWidth - 280 : false;
   const isNearTop = pos.y < 120;
@@ -370,32 +468,26 @@ const SentinelCompanion = () => {
                   isNearTop ? 'top-full mt-3.5' : 'bottom-full mb-3.5'
                 } ${
                   isNearRight ? 'right-0' : 'left-0'
-                } w-[240px] sm:w-[280px] p-2.5 sm:p-3 rounded-2xl backdrop-blur-3xl border text-xs font-mono font-medium z-[9999] pointer-events-none transition-colors duration-300 ${
-                  isDark
-                    ? 'bg-warden-surface/98 shadow-[0_16px_45px_rgba(0,0,0,0.95)]'
-                    : 'bg-[#ffffff]/98 shadow-[0_14px_38px_rgba(120,53,15,0.14)]'
-                } ${
+                } w-[240px] sm:w-[280px] p-2.5 sm:p-3 rounded-2xl bg-warden-surface/98 backdrop-blur-3xl border shadow-[0_12px_40px_rgba(0,0,0,0.9)] text-xs font-mono font-medium z-[9999] pointer-events-none ${
                   emotion === 'scared'
                     ? 'border-status-blocked text-status-blocked shadow-[0_0_20px_hsl(var(--status-blocked)/0.3)]'
                     : emotion === 'alert'
-                    ? isDark ? 'border-warden-amber text-warden-amber shadow-[0_0_15px_hsl(var(--warden-amber)/0.2)]' : 'border-amber-600 text-amber-700'
-                    : isDark ? 'border-warden-amber/40 text-warden-text' : 'border-amber-600/40 text-stone-900'
+                    ? 'border-warden-amber text-warden-amber shadow-[0_0_15px_hsl(var(--warden-amber)/0.2)]'
+                    : 'border-warden-amber/40 text-warden-text'
                 }`}
               >
-                <div className={`flex items-center justify-between gap-1.5 mb-1 pb-1 border-b text-[9px] font-bold uppercase tracking-wider ${
-                  isDark ? 'border-warden-border/40' : 'border-stone-200'
-                }`}>
+                <div className="flex items-center justify-between gap-1.5 mb-1 pb-1 border-b border-warden-border/40 text-[9px] font-bold uppercase tracking-wider">
                   <div className="flex items-center gap-1.5">
                     {emotion === 'scared' ? (
                       <AlertTriangle className="h-3 w-3 text-status-blocked animate-bounce" />
                     ) : emotion === 'happy' ? (
                       <Heart className="h-3 w-3 text-warden-emerald fill-current" />
                     ) : emotion === 'alert' ? (
-                      <Shield className={`h-3 w-3 ${isDark ? 'text-warden-amber' : 'text-amber-600'}`} />
+                      <Shield className="h-3 w-3 text-warden-amber" />
                     ) : (
-                      <Sparkles className={`h-3 w-3 ${isDark ? 'text-warden-amber' : 'text-amber-600'}`} />
+                      <Sparkles className="h-3 w-3 text-warden-amber" />
                     )}
-                    <span className={isDark ? 'text-warden-text' : 'text-stone-900'}>Warden Bot</span>
+                    <span>Warden Bot</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     {!isOnline ? (
@@ -407,7 +499,7 @@ const SentinelCompanion = () => {
                         <CheckCircle2 className="h-2.5 w-2.5" /> HEALTHY
                       </span>
                     )}
-                    <span className={`text-[8px] font-mono ${isDark ? 'text-warden-amber/80' : 'text-amber-700'}`}>
+                    <span className="text-[8px] text-warden-amber/80 font-mono">
                       {!hasDepartedLogo ? 'PERCHED' : isFreeRoaming ? 'ROAM' : 'HOVER'}
                     </span>
                   </div>
@@ -418,10 +510,8 @@ const SentinelCompanion = () => {
                 <div
                   className={`absolute ${
                     isNearTop ? '-top-1.5 border-l border-t' : '-bottom-1.5 border-r border-b'
-                  } w-3 h-3 rotate-45 ${
-                    isDark ? 'bg-warden-surface' : 'bg-[#ffffff]'
-                  } ${
-                    emotion === 'scared' ? 'border-status-blocked' : isDark ? 'border-warden-amber/40' : 'border-amber-600/40'
+                  } w-3 h-3 bg-warden-surface rotate-45 ${
+                    emotion === 'scared' ? 'border-status-blocked' : 'border-warden-amber/40'
                   } ${isNearRight ? 'right-6' : 'left-6'}`}
                 />
               </motion.div>
@@ -442,28 +532,8 @@ const SentinelCompanion = () => {
             }}
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.94 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isDragging) return;
-              playRoboChirp('flip');
-              setFlipDegree((prev) => prev + 360);
-              const next = pokeCount + 1;
-              setPokeCount(next);
-              showSpeechBubble("🛡️ Warden bodyguard reporting: All systems fully nominal and patrolling!", "happy", 3500);
-            }}
-            onDoubleClick={(e) => {
-              if (e) e.stopPropagation();
-              playRoboChirp('roam');
-              const next = !isFreeRoaming;
-              setIsFreeRoaming(next);
-              if (!next) {
-                showSpeechBubble('Hover Mode: Holding coordinates in place.', 'idle', 2800);
-              } else {
-                setHasDepartedLogo(true);
-                showSpeechBubble('✦ Free Roam ACTIVE! Exploring viewport...', 'happy', 3200);
-                glideToNewWaypoint();
-              }
-            }}
+            onClick={handlePoke}
+            onDoubleClick={toggleRoamMode}
             onMouseEnter={() => {
               setIsHovered(true);
               isInteractingRef.current = true;
@@ -481,48 +551,38 @@ const SentinelCompanion = () => {
           >
             {/* Ambient Kinetic Plasma Aura */}
             <div
-              className={`absolute -inset-2.5 rounded-full blur-md transition-colors duration-500 ${
+              className={`absolute -inset-2.5 rounded-full blur-md opacity-60 transition-colors duration-500 ${
                 emotion === 'scared'
-                  ? 'bg-status-blocked opacity-70 animate-pulse'
+                  ? 'bg-status-blocked animate-pulse'
                   : recentErrors.length > 0
-                  ? 'bg-status-blocked/50 opacity-70 animate-pulse'
-                  : isDark
-                  ? 'bg-warden-amber/35 group-hover:bg-warden-amber/65 opacity-60'
-                  : 'bg-amber-500/30 group-hover:bg-amber-500/60 opacity-70'
+                  ? 'bg-status-blocked/50 animate-pulse'
+                  : 'bg-warden-amber/35 group-hover:bg-warden-amber/65'
               }`}
             />
 
             {/* Top Antenna with Pulsing Beacon Light */}
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none">
               <span
-                className={`w-2 h-2 rounded-full border shadow-sm animate-pulse ${
+                className={`w-2 h-2 rounded-full border border-black shadow-sm animate-pulse ${
                   emotion === 'scared' || recentErrors.length > 0 || !isOnline
                     ? 'bg-status-blocked shadow-[0_0_10px_hsl(var(--status-blocked))]'
                     : 'bg-warden-emerald shadow-[0_0_8px_hsl(var(--warden-emerald))]'
-                } ${isDark ? 'border-black' : 'border-stone-800'}`}
+                }`}
               />
-              <span className={`w-0.5 h-2 ${isDark ? 'bg-warden-amber/80' : 'bg-amber-600'}`} />
+              <span className="w-0.5 h-2 bg-warden-amber/80" />
             </div>
 
             {/* Main Robot Chassis */}
-            <div
-              className={`relative w-12 h-12 rounded-2xl border-2 flex flex-col items-center justify-center p-1 overflow-hidden transition-all duration-500 ${
-                isDark
-                  ? 'bg-gradient-to-br from-[#1c1a17] via-[#141311] to-[#0c0b0a] border-warden-amber/60 shadow-[0_12px_32px_rgba(0,0,0,0.95),inset_0_1px_2px_rgba(255,255,255,0.15)]'
-                  : 'bg-gradient-to-br from-[#ffffff] via-[#f7f4ee] to-[#ebe4d8] border-amber-600/80 shadow-[0_10px_30px_rgba(180,83,9,0.22),inset_0_1px_2px_rgba(255,255,255,0.9)]'
-              }`}
-            >
+            <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-warden-surface via-[#181614] to-warden-surface border-2 border-warden-amber/60 shadow-[0_8px_25px_rgba(0,0,0,0.85),inset_0_0_10px_hsl(var(--warden-amber)/0.2)] flex flex-col items-center justify-center p-1 overflow-hidden">
               {/* Glossy Reflection Highlight */}
-              <div className={`absolute top-0 left-0 right-0 h-3 rounded-t-xl ${isDark ? 'bg-white/10' : 'bg-white/55'}`} />
+              <div className="absolute top-0 left-0 right-0 h-3 bg-white/10 rounded-t-xl" />
 
               {/* Visor / Face Screen */}
               <div
                 className={`w-9 h-5 rounded-lg flex items-center justify-center transition-colors duration-300 ${
                   emotion === 'scared' || recentErrors.length > 0 || !isOnline
                     ? 'bg-status-blocked/25 border border-status-blocked/60'
-                    : isDark
-                    ? 'bg-[#0a0a08] border border-warden-amber/40 shadow-inner'
-                    : 'bg-[#1c1815] border border-amber-600/60 shadow-inner'
+                    : 'bg-black/85 border border-warden-amber/40 shadow-inner'
                 }`}
               >
                 {/* Animated Visor Eyes */}
@@ -537,16 +597,16 @@ const SentinelCompanion = () => {
                     <span>^</span>
                   </div>
                 ) : emotion === 'curious' ? (
-                  <div className={`flex items-center gap-1.5 font-mono font-black text-xs ${isDark ? 'text-warden-amber' : 'text-amber-400'}`}>
+                  <div className="flex items-center gap-1.5 text-warden-amber font-mono font-black text-xs">
                     <span className="animate-pulse">o</span>
                     <span>_</span>
                     <span className="animate-pulse">O</span>
                   </div>
                 ) : (
-                  <div className={`flex items-center gap-1.5 font-mono font-black text-[11px] ${isDark ? 'text-warden-amber' : 'text-amber-400'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isDark ? 'bg-warden-amber' : 'bg-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.9)]'}`} />
-                    <span className={`w-1 h-0.5 ${isDark ? 'bg-warden-amber/60' : 'bg-amber-400/60'}`} />
-                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isDark ? 'bg-warden-amber' : 'bg-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.9)]'}`} />
+                  <div className="flex items-center gap-1.5 text-warden-amber font-mono font-black text-[11px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-warden-amber animate-pulse" />
+                    <span className="w-1 h-0.5 bg-warden-amber/60" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-warden-amber animate-pulse" />
                   </div>
                 )}
               </div>
@@ -558,7 +618,7 @@ const SentinelCompanion = () => {
                     recentErrors.length > 0 ? 'bg-status-blocked' : 'bg-warden-emerald'
                   }`}
                 />
-                <span className={`text-[7px] font-mono font-bold tracking-tighter ${isDark ? 'text-warden-text/70' : 'text-stone-800 font-extrabold'}`}>
+                <span className="text-[7px] font-mono font-bold text-warden-text/60 tracking-tighter">
                   WARDEN
                 </span>
               </div>
@@ -568,16 +628,12 @@ const SentinelCompanion = () => {
             <motion.div
               animate={{ rotate: isDragging ? [-18, 18] : [-6, 6, -6] }}
               transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-              className={`absolute -left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-4 rounded-full border pointer-events-none transition-colors duration-300 ${
-                isDark ? 'bg-warden-amber border-black/80' : 'bg-amber-600 border-amber-900/60'
-              }`}
+              className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-4 rounded-full bg-warden-amber/80 border border-black pointer-events-none"
             />
             <motion.div
               animate={{ rotate: isDragging ? [18, -18] : [6, -6, 6] }}
               transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-              className={`absolute -right-1.5 top-1/2 -translate-y-1/2 w-1.5 h-4 rounded-full border pointer-events-none transition-colors duration-300 ${
-                isDark ? 'bg-warden-amber border-black/80' : 'bg-amber-600 border-amber-900/60'
-              }`}
+              className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-1.5 h-4 rounded-full bg-warden-amber/80 border border-black pointer-events-none"
             />
 
             {/* Bottom Dual Thruster Plasma Jet */}
@@ -585,15 +641,15 @@ const SentinelCompanion = () => {
               <span
                 className={`rounded-full blur-[2px] animate-pulse transition-all ${
                   isDragging
-                    ? isDark ? 'w-2 h-4 bg-warden-amber shadow-[0_0_16px_hsl(var(--warden-amber))]' : 'w-2 h-4 bg-amber-500 shadow-[0_0_14px_rgba(245,158,11,0.85)]'
-                    : isDark ? 'w-1.5 h-2 bg-warden-amber/90' : 'w-1.5 h-2 bg-amber-500/90'
+                    ? 'w-2 h-4 bg-warden-amber shadow-[0_0_14px_hsl(var(--warden-amber))]'
+                    : 'w-1.5 h-2 bg-warden-amber/90'
                 }`}
               />
               <span
                 className={`rounded-full blur-[2px] animate-pulse transition-all ${
                   isDragging
-                    ? isDark ? 'w-2 h-4 bg-warden-amber shadow-[0_0_16px_hsl(var(--warden-amber))]' : 'w-2 h-4 bg-amber-500 shadow-[0_0_14px_rgba(245,158,11,0.85)]'
-                    : isDark ? 'w-1.5 h-2 bg-warden-amber/90' : 'w-1.5 h-2 bg-amber-500/90'
+                    ? 'w-2 h-4 bg-warden-amber shadow-[0_0_14px_hsl(var(--warden-amber))]'
+                    : 'w-1.5 h-2 bg-warden-amber/90'
                 }`}
               />
             </div>
@@ -606,24 +662,8 @@ const SentinelCompanion = () => {
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 5 }}
-                onClick={(e) => {
-                  if (e) e.stopPropagation();
-                  playRoboChirp('roam');
-                  const next = !isFreeRoaming;
-                  setIsFreeRoaming(next);
-                  if (!next) {
-                    showSpeechBubble('Hover Mode: Holding coordinates in place.', 'idle', 2800);
-                  } else {
-                    setHasDepartedLogo(true);
-                    showSpeechBubble('✦ Free Roam ACTIVE! Exploring viewport...', 'happy', 3200);
-                    glideToNewWaypoint();
-                  }
-                }}
-                className={`mt-2.5 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold transition-colors shadow-lg flex items-center gap-1 cursor-pointer pointer-events-auto ${
-                  isDark
-                    ? 'bg-warden-surface/90 hover:bg-warden-amber hover:text-black border border-warden-amber/40 text-warden-amber'
-                    : 'bg-white/95 hover:bg-amber-600 hover:text-white border border-amber-600/50 text-amber-800'
-                }`}
+                onClick={toggleRoamMode}
+                className="mt-2.5 px-2.5 py-0.5 rounded-full bg-warden-surface/90 hover:bg-warden-amber hover:text-black border border-warden-amber/40 text-[9px] font-mono font-bold text-warden-amber transition-colors shadow-lg flex items-center gap-1 cursor-pointer pointer-events-auto"
                 title="Toggle Autonomous Free Roam"
               >
                 <Compass className="h-2.5 w-2.5" />
