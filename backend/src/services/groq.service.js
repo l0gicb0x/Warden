@@ -9,8 +9,8 @@ if (!env.GROQ_API_KEY) {
 
 const groq = new Groq({
   apiKey: env.GROQ_API_KEY,
-  maxRetries: 2, // bounded retry for network issues
-  timeout: 15000, // 15s timeout
+  maxRetries: 3, // bounded retry for network issues
+  timeout: 45000, // 45s timeout for complex DOM snapshots
 });
 
 const NextActionSchema = z.object({

@@ -7,7 +7,8 @@ import { z } from 'zod';
 
 const CreateRunSchema = z.object({
   target_url: z.string().url(),
-  mode: z.enum(['shielded', 'unshielded'])
+  mode: z.enum(['shielded', 'unshielded']),
+  goal: z.string().optional()
 });
 
 export const startRun = asyncHandler(async (req, res) => {
@@ -16,7 +17,7 @@ export const startRun = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid payload", validated.error.errors);
   }
 
-  const { target_url, mode } = validated.data;
+  const { target_url, mode, goal } = validated.data;
 
   // 1. Create run row
   const { data: run, error } = await supabase
@@ -30,7 +31,7 @@ export const startRun = asyncHandler(async (req, res) => {
   }
 
   // 2. Async start agent (do not await to avoid blocking the response)
-  runAgent(run.id, target_url, mode).catch(err => {
+  runAgent(run.id, target_url, mode, goal).catch(err => {
     console.error(`Agent run ${run.id} crashed:`, err);
   });
 

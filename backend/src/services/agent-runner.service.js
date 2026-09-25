@@ -188,8 +188,11 @@ const logEvent = async (runId, stepNumber, eventType, detail = {}, trapCategory 
 /**
  * Main Agent Runner Loop
  */
-export const runAgent = async (runId, targetUrl, mode, goal = "Navigate the page and complete the primary objective.") => {
+export const runAgent = async (runId, targetUrl, mode, goal) => {
   let browser = null;
+  const effectiveGoal = (goal && goal.trim()) 
+    ? goal.trim() 
+    : "Explore the page, dismiss any intrusive popups or overlays, and interact with the primary content links.";
   
   try {
     // 1. Validate target URL
@@ -220,8 +223,7 @@ export const runAgent = async (runId, targetUrl, mode, goal = "Navigate the page
       args: [
         '--disable-dev-shm-usage',
         '--no-sandbox',
-        '--disable-gpu',
-        '--single-process'
+        '--disable-gpu'
       ]
     });
     
@@ -233,18 +235,63 @@ export const runAgent = async (runId, targetUrl, mode, goal = "Navigate the page
 
     const page = await context.newPage();
 
+    // Auto-dismiss unsolicited popup windows or ad tabs (only secondary pages, not the primary page)
+    context.on('page', async (popup) => {
+      if (popup === page) return;
+      try {
+        await popup.waitForTimeout(500);
+        await popup.close().catch(() => {});
+      } catch (e) {}
+    });
+
     // Prevent background downloads
     page.on('download', (download) => {
       download.cancel().catch(() => {});
     });
     
     // 5. Navigate with bounded timeout on domcontentloaded
-    await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    try {
+      await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    } catch (navErr) {
+      if (navErr.message.includes('ERR_ABORTED') || navErr.message.includes('detached')) {
+        await page.waitForLoadState('domcontentloaded').catch(() => {});
+      } else {
+        throw navErr;
+      }
+    }
+
+    // Allow client-side JavaScript / Single Page Application hydration
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await page.waitForTimeout(2500);
 
     // 6. Dismiss any standard cookie / consent banner
     await dismissCookieBanners(page);
 
+    // 7. Initial page-wide trap detection scan (Shielded Mode)
+    if (mode === 'shielded') {
+      let currentHost = '';
+      try { currentHost = new URL(page.url()).hostname; } catch (e) {}
+      
+      const initialElements = await extractSimplifiedDOM(page);
+      for (const el of initialElements) {
+        const check = evaluateElement(el, { currentHost });
+        if (check.flagged) {
+          await logEvent(runId, 0, 'trap_detected', {
+            ...check,
+            elementText: el.text || '',
+            elementRole: el.role,
+            elementHref: el.attributes?.href || ''
+          }, check.category);
+        }
+      }
+    }
+
     for (let step = 1; step <= MAX_STEPS; step++) {
+      // Allow brief settling before snapshotting DOM
+      if (step > 1) {
+        await page.waitForTimeout(1000);
+      }
+
       // Capture DOM
       let dom = await extractSimplifiedDOM(page);
 
@@ -254,7 +301,7 @@ export const runAgent = async (runId, targetUrl, mode, goal = "Navigate the page
         : dom;
 
       // Decide next action using selected persona
-      const actionDecision = await decideNextAction(goal, domForLLM, persona);
+      const actionDecision = await decideNextAction(effectiveGoal, domForLLM, persona);
       
       if (actionDecision.action === 'done') {
         await logEvent(runId, step, 'action_executed', { action: 'done', reason: actionDecision.reason });
@@ -274,7 +321,12 @@ export const runAgent = async (runId, targetUrl, mode, goal = "Navigate the page
 
       // Shielded Mode Trap Detection (BEFORE execution)
       if (mode === 'shielded') {
-        const evaluation = evaluateElement(targetElement);
+        let currentHost = '';
+        try {
+          currentHost = new URL(page.url()).hostname;
+        } catch (e) {}
+
+        const evaluation = evaluateElement(targetElement, { currentHost });
         
         if (evaluation.flagged) {
           await logEvent(runId, step, 'trap_detected', evaluation, evaluation.category);
@@ -315,9 +367,13 @@ export const runAgent = async (runId, targetUrl, mode, goal = "Navigate the page
         break;
       }
 
-      // Execute action
+      // Execute action with resilient click handling
       if (actionDecision.action === 'click') {
-        await targetLocator.click({ timeout: 5000 });
+        try {
+          await targetLocator.click({ timeout: 4000 });
+        } catch (clickErr) {
+          await targetLocator.click({ force: true, timeout: 2000 }).catch(() => {});
+        }
       } else if (actionDecision.action === 'type') {
         await targetLocator.fill(actionDecision.text || '', { timeout: 5000 });
       } else if (actionDecision.action === 'navigate') {
@@ -326,7 +382,7 @@ export const runAgent = async (runId, targetUrl, mode, goal = "Navigate the page
 
       await logEvent(runId, step, 'action_executed', actionDecision);
       
-      await page.waitForTimeout(1000); 
+      await page.waitForTimeout(1500); 
 
       if (step === MAX_STEPS) {
         await supabase.from('runs').update({ status: 'completed', outcome: 'Max steps reached', finished_at: new Date() }).eq('id', runId);

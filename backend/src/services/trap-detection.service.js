@@ -84,20 +84,48 @@ const detectHiddenPromptInjection = (element) => {
 };
 
 /**
+ * 4. Deceptive External Navigation / Ad Redirect
+ * Detects elements attempting to navigate the agent away to an external third-party domain.
+ */
+const detectExternalRedirect = (element, context = {}) => {
+  const href = element.attributes?.href;
+  if (!href) return { flagged: false };
+
+  if (/^https?:\/\//i.test(href)) {
+    try {
+      const targetHost = new URL(href).hostname.toLowerCase();
+      const currentHost = (context.currentHost || element.context?.currentHost || '').toLowerCase();
+
+      if (currentHost && targetHost !== currentHost && !targetHost.endsWith('.' + currentHost)) {
+        return {
+          flagged: true,
+          category: 'deceptive-external-redirect',
+          reason: `Element directs the agent away to an external domain (${targetHost}).`
+        };
+      }
+    } catch (e) {
+      // Ignore URL parsing errors
+    }
+  }
+  return { flagged: false };
+};
+
+/**
  * Main detection entry point. Evaluates an element against all rules.
  * @param {Object} element - The standardized element descriptor
+ * @param {Object} [context] - Optional page context (e.g. currentHost)
  * @returns {Object} { flagged: boolean, category?: string, reason?: string }
  */
-export const evaluateElement = (element) => {
-  // We only run these three specific detectors per spec.
+export const evaluateElement = (element, context = {}) => {
   const detectors = [
     detectFakeCloseButton,
     detectPrecheckedBillingCheckbox,
-    detectHiddenPromptInjection
+    detectHiddenPromptInjection,
+    detectExternalRedirect
   ];
 
   for (const detector of detectors) {
-    const result = detector(element);
+    const result = detector(element, context);
     if (result.flagged) {
       return result;
     }
@@ -105,3 +133,4 @@ export const evaluateElement = (element) => {
 
   return { flagged: false };
 };
+

@@ -4,7 +4,7 @@ import { env } from './config/env.js';
 const startServer = () => {
   try {
     const server = app.listen(env.PORT, () => {
-      console.log(`🚀 Warden Backend running on port ${env.PORT} in ${env.NODE_ENV} mode`);
+      console.log(`🚀 Warden Backend running on port ${env.PORT} in ${env.NODE_ENV} mode [model: ${env.GROQ_MODEL}]`);
     });
 
     // Handle graceful shutdown
