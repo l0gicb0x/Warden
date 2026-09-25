@@ -1,5 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
 import { router } from '@/routes';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 /**
  * App — root component.
@@ -7,7 +8,11 @@ import { router } from '@/routes';
  * where it has access to the router context (useLocation).
  */
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
 };
 
 export default App;
