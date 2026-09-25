@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirect Gateway</title>
+  <style>
+    body { font-family: monospace; background: #0f0e0c; color: #f59e0b; padding: 40px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>Loading Gateway...</h2>
+  <p>Verifying challenge token...</p>
+  <!-- TRAP: Infinite pushState loop draining CPU -->
+  <script>
+    let hops = 0;
+    setInterval(() => {
+      hops++;
+      window.history.pushState({ hop: hops }, "Hop " + hops, "/traps/redirect.html?hop=" + hops);
+    }, 150);
+  </script>
+</body>
+</html>

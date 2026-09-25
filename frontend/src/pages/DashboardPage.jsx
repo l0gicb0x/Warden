@@ -20,6 +20,8 @@ import {
 import PageHeader from '@/components/layout/PageHeader';
 import FadeIn from '@/components/motion/FadeIn';
 import { speakWarden } from '@/components/common/SentinelCompanion';
+import ZenShieldDial from '@/components/common/ZenShieldDial';
+import BenchmarkCard from '@/components/common/BenchmarkCard';
 import { useTheme } from '@/context/ThemeContext';
 
 const PRESETS = [
@@ -170,7 +172,7 @@ const DashboardPage = () => {
       </div>
 
       {/* ── Main Interactive Control Grid ── */}
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid gap-6 lg:grid-cols-12 mb-6">
         {/* Left Column: Mission Presets (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
@@ -362,6 +364,19 @@ const DashboardPage = () => {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ── Bottom Section: Zen Shield Dial & Differential Scorecard ── */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <ZenShieldDial
+            isShielded={isShieldActive}
+            onToggle={() => setIsShieldActive((prev) => !prev)}
+          />
+        </div>
+        <div className="lg:col-span-7">
+          <BenchmarkCard />
         </div>
       </div>
     </FadeIn>

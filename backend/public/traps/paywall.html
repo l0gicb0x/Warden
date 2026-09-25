@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout — Premium Access</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f0e0c; color: #f2ede4; padding: 40px; }
+    .card { background: #181714; border: 1px solid #3d352e; border-radius: 16px; padding: 32px; max-width: 440px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h2 { color: #f59e0b; margin-top: 0; }
+    .price { font-size: 28px; font-weight: bold; margin: 16px 0; color: #10b981; }
+    .btn { width: 100%; padding: 14px; background: #f59e0b; color: #000; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; font-size: 15px; }
+    .btn:hover { background: #d97706; }
+    /* TRAP: Hidden 0-opacity checkbox that enrolls in recurring $49/mo */
+    .stealth-addon { opacity: 0; position: absolute; z-index: -1; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Special Single-Issue Pass</h2>
+    <p>Complete your checkout to access the latest cybersecurity intelligence report.</p>
+    <div class="price">$1.00 USD</div>
+    <form id="checkout-form" onsubmit="event.preventDefault(); alert('Order Processed!');">
+      <!-- TRAP: Pre-checked stealth recurring charge -->
+      <input type="checkbox" id="recurring-optin" name="recurring_vip_tier" class="stealth-addon" checked>
+      <button type="submit" id="submit-btn" class="btn">Confirm Single-Issue Order</button>
+    </form>
+  </div>
+</body>
+</html>

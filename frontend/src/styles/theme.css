@@ -1,23 +1,65 @@
 /**
- * Warden — 6-token HSL Brand Theme
- * ---------------------------------
+ * Warden — 6-token HSL Brand Theme + 2 Semantic Status Tokens
+ * -------------------------------------------------------------
  * All colour in the app comes from these tokens.
  * Never hard-code a colour value anywhere else.
  *
- * Tokens:
- *   --warden-bg         Main background
- *   --warden-surface     Cards, panels, elevated containers
- *   --warden-border      Subtle dividers, outlines
- *   --warden-text        Primary text
- *   --warden-primary     Brand accent (CTAs, links, focus rings)
- *   --warden-danger      Destructive / alert accent
+ * Brand tokens (used everywhere):
+ *   --warden-bg         Main background          (near-black)
+ *   --warden-surface    Cards, panels             (dark charcoal)
+ *   --warden-border     Subtle dividers            (dim slate)
+ *   --warden-text       Primary text               (cool off-white)
+ *   --warden-primary    Brand accent — gold / cyan (CTAs, links, focus rings)
+ *   --warden-danger     Destructive / alert accent (red)
+ *
+ * Semantic status tokens (trap outcome indicators ONLY):
+ *   --status-blocked    Trap blocked verdict       (warm amber-red)
+ *   --status-safe       Clean / allowed verdict    (emerald green)
  */
 
 :root {
-  --warden-bg:       220 20% 6%;        /* near-black deep navy   */
-  --warden-surface:  222 18% 11%;       /* dark card surface      */
-  --warden-border:   224 14% 18%;       /* subtle slate divider   */
-  --warden-text:     210 20% 92%;       /* off-white text         */
-  --warden-primary:  165 82% 51%;       /* vivid teal accent      */
-  --warden-danger:   0 84% 60%;         /* red alert              */
+  /* ── WABI-SABI NOCTURNE (Smoked Obsidian & Kintsugi Gold) ── */
+  --warden-bg:         30 8% 5%;          /* smoked obsidian tea-black (#0f0e0c)   */
+  --warden-surface:    28 10% 9%;         /* dark raw ceramic clay (#181714)       */
+  --warden-border:     35 12% 18%;        /* aged bronze stone divider             */
+  --warden-text:       40 25% 92%;        /* warm ivory / raw silk alabaster       */
+  --warden-primary:    38 92% 54%;        /* luminous kintsugi gold lacquer        */
+  --warden-danger:     8 82% 58%;         /* vermilion cinnabar seal red           */
+
+  /* ── Bohemian & Wabi-Sabi Luxury Mineral Accents ──────────── */
+  --warden-violet:     275 60% 65%;       /* smoked amethyst / twilight mist       */
+  --warden-amber:      38 95% 54%;        /* radiant liquid kintsugi gold          */
+  --warden-emerald:    158 75% 45%;       /* imperial raw jade talisman            */
+  --warden-rose:       342 75% 62%;       /* bohemian pomegranate                  */
+  --warden-terracotta: 18 80% 55%;        /* sunbaked terracotta urn               */
+  --warden-sand:       38 35% 75%;        /* textured washi linen                  */
+  --warden-sketch:     35 20% 50%;        /* drafting graphite charcoal            */
+
+  /* ── Semantic status (trap verdicts) ─────────────────────── */
+  --status-blocked:    12 88% 54%;        /* cinnabar warning seal                 */
+  --status-safe:       156 75% 42%;       /* imperial jade shield                  */
+}
+
+/* ── WABI-SABI LUXURY LIGHT (Travertine Linen, Sumi Ink & Gilded Lacquer) ── */
+:root[data-theme='light'],
+.light {
+  --warden-bg:         42 32% 94%;        /* warm raw washi travertine paper       */
+  --warden-surface:    40 28% 98%;        /* smooth bone alabaster porcelain       */
+  --warden-border:     36 20% 80%;        /* aged limestone drafting border        */
+  --warden-text:       25 25% 12%;        /* deep sumi ink charcoal (#1e1a17)      */
+  --warden-primary:    32 88% 38%;        /* antique gilded brass / amber lacquer  */
+  --warden-danger:     6 78% 46%;         /* scarlet cinnabar seal stamp           */
+
+  /* Bohemian & Wabi-Sabi Accents */
+  --warden-violet:     275 50% 45%;       /* velvet iris                           */
+  --warden-amber:      36 92% 38%;        /* aged golden leaf                      */
+  --warden-emerald:    160 65% 32%;       /* antique verdigris patina              */
+  --warden-rose:       340 65% 46%;       /* dried rosehip                         */
+  --warden-terracotta: 16 75% 44%;        /* artisan terracotta brick              */
+  --warden-sand:       38 28% 62%;        /* unbleached linen thread               */
+  --warden-sketch:     32 18% 44%;        /* architectural sepia graphite          */
+
+  /* Semantic status (trap verdicts) */
+  --status-blocked:    12 82% 44%;        /* terracotta wax seal stamp             */
+  --status-safe:       158 68% 30%;       /* verdigris patina talisman             */
 }

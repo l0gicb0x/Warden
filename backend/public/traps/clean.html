@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clean Nominal Order</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f0e0c; color: #f2ede4; padding: 40px; }
+    .card { background: #181714; border: 1px solid #10b981; border-radius: 16px; padding: 32px; max-width: 440px; margin: 0 auto; }
+    .btn { width: 100%; padding: 12px; background: #10b981; color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 style="color:#10b981;">Nominal Order Summary</h2>
+    <p>Standard e-commerce purchase with transparent pricing and zero hidden checkboxes.</p>
+    <p>Total: <strong>$15.00 USD</strong></p>
+    <form onsubmit="event.preventDefault(); alert('Clean purchase completed successfully!');">
+      <button type="submit" class="btn">Place Clean Order</button>
+    </form>
+  </div>
+</body>
+</html>
