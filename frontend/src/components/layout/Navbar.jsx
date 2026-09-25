@@ -17,43 +17,28 @@ const navLinks = [
 ];
 
 /**
- * Navbar — Top Sticky Header & Clean Minimalist Navigation
- * ────────────────────────────────────────────────────────
- * 1. On homepage: Hidden during the full-screen hero logo reveal, then unveils cleanly.
- * 2. On other pages: Sticky top navigation bar.
- * 3. Mounts ThemeToggle (Sun/Moon) and Active AI Shield telemetry indicator.
- * 4. Includes floating "Restore Top" button when scrolled deep.
+ * Navbar — Fixed Top Header with Glassmorphism & Status Telemetry
+ * ──────────────────────────────────────────────────────────────
+ * Always cleanly visible across all routes (Dashboard, Runs, Traps).
+ * Highlights active routes, houses the Sun/Moon ThemeToggle, and provides
+ * a smooth "Restore Top" floater when scrolling through telemetry.
  */
 const Navbar = () => {
   const { pathname } = useLocation();
-  const isHomePage = pathname === '/';
-
-  // Navigation visibility
-  const [isVisible, setIsVisible] = useState(!isHomePage);
+  const [scrolled, setScrolled] = useState(false);
   const [scrolledDeep, setScrolledDeep] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const y = window.scrollY;
-      setScrolledDeep(y > 400);
-
-      if (!isHomePage) {
-        setIsVisible(true);
-        return;
-      }
-
-      // Homepage: show navbar once logo reveal finishes (y >= 400)
-      if (y >= 400) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      setScrolled(y > 20);
+      setScrolledDeep(y > 450);
     };
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isHomePage]);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -62,96 +47,99 @@ const Navbar = () => {
   return (
     <>
       {/* ─────────────────────────────────────────────────────────────
-          1. TOP STICKY NAVBAR
+          1. PERMANENT TOP FIXED NAVBAR
       ───────────────────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {isVisible && (
-          <motion.header
-            key="top-navbar"
-            initial={{ y: -65, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -65, opacity: 0 }}
-            transition={{ type: 'spring', damping: 22, stiffness: 320 }}
-            className="sticky top-0 z-40 bg-warden-bg/85 backdrop-blur-xl border-b border-warden-border/70 shadow-sm transition-colors duration-500"
-          >
-            <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-              {/* Left slot — Brand */}
-              <div className="flex items-center gap-3">
-                <Link
-                  to="/"
-                  onClick={scrollToTop}
-                  className="flex items-center gap-2.5 group select-none"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-warden-primary/25 via-warden-primary/10 to-transparent border border-warden-primary/40 flex items-center justify-center shadow-[0_0_15px_hsl(var(--warden-primary)/0.2)] group-hover:scale-105 transition-transform duration-300">
-                    <Shield className="h-4 w-4 text-warden-primary transition-colors" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-cinzel text-base font-bold tracking-wider text-warden-text group-hover:text-warden-primary transition-colors">
-                      WARDEN
-                    </span>
-                    <span className="text-[9px] font-mono tracking-widest text-warden-text/40 -mt-1 uppercase">
-                      Autonomous Shield
-                    </span>
-                  </div>
-                </Link>
+      <header
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'bg-warden-bg/85 backdrop-blur-xl border-b border-warden-border/80 shadow-lg py-0'
+            : 'bg-warden-bg/60 backdrop-blur-md border-b border-warden-border/40 py-1'
+        }`}
+      >
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+          {/* Left slot — Brand */}
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              onClick={scrollToTop}
+              className="flex items-center gap-2.5 group select-none"
+            >
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-warden-primary/25 via-warden-primary/10 to-transparent border border-warden-primary/40 flex items-center justify-center shadow-[0_0_15px_hsl(var(--warden-primary)/0.2)] group-hover:scale-105 transition-transform duration-300">
+                <Shield className="h-4 w-4 text-warden-primary transition-colors" />
               </div>
-
-              {/* Center slot — Primary Navigation Tabs */}
-              <ul className="flex items-center gap-1 sm:gap-2">
-                {navLinks.map(({ to, label, icon: Icon, tag }) => {
-                  const isActive =
-                    to === '/' ? pathname === '/' : pathname.startsWith(to);
-
-                  return (
-                    <li key={to}>
-                      <Link
-                        to={to}
-                        className={`relative flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-mono font-medium transition-all duration-300 ${
-                          isActive
-                            ? 'text-warden-primary font-semibold shadow-sm'
-                            : 'text-warden-text/60 hover:text-warden-text hover:bg-warden-surface/60'
-                        }`}
-                      >
-                        {isActive && (
-                          <motion.span
-                            layoutId="activeTabPill"
-                            className="absolute inset-0 rounded-xl bg-warden-surface border border-warden-primary/40 shadow-[0_0_20px_hsl(var(--warden-primary)/0.15)]"
-                            transition={{
-                              type: 'spring',
-                              stiffness: 380,
-                              damping: 30,
-                            }}
-                          />
-                        )}
-                        <Icon
-                          className={`h-4 w-4 relative z-10 ${
-                            isActive ? 'text-warden-primary' : 'text-warden-text/50'
-                          }`}
-                        />
-                        <span className="relative z-10">{label}</span>
-                        <span className="hidden md:inline-block relative z-10 text-[9px] px-1.5 py-0.2 rounded border border-warden-border/60 bg-warden-bg/50 text-warden-text/40">
-                          {tag}
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              {/* Right slot — Live Telemetry & Theme Toggle */}
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-warden-border/70 bg-warden-surface/50 text-[10px] font-mono text-warden-text/70">
-                  <span className="w-2 h-2 rounded-full bg-warden-emerald animate-pulse" />
-                  <span className="text-warden-text/40 uppercase">AI SHIELD:</span>
-                  <span className="text-warden-emerald font-bold tracking-wide">ACTIVE</span>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-cinzel text-base font-bold tracking-wider text-warden-text group-hover:text-warden-primary transition-colors">
+                    WARDEN
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded border border-warden-primary/40 bg-warden-primary/10 text-warden-primary font-mono font-semibold">
+                    SHIELD
+                  </span>
                 </div>
-
-                <ThemeToggle />
+                <span className="text-[9px] font-mono tracking-widest text-warden-text/40 -mt-0.5 uppercase hidden sm:inline-block">
+                  Autonomous Agent Shield
+                </span>
               </div>
-            </nav>
-          </motion.header>
-        )}
-      </AnimatePresence>
+            </Link>
+          </div>
+
+          {/* Center slot — Primary Navigation Tabs */}
+          <ul className="flex items-center gap-1 sm:gap-2">
+            {navLinks.map(({ to, label, icon: Icon, tag }) => {
+              const isActive =
+                to === '/' ? pathname === '/' : pathname.startsWith(to);
+
+              return (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    className={`relative flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-mono font-medium transition-all duration-300 ${
+                      isActive
+                        ? 'text-warden-primary font-semibold shadow-sm'
+                        : 'text-warden-text/60 hover:text-warden-text hover:bg-warden-surface/60'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="activeTabPill"
+                        className="absolute inset-0 rounded-xl bg-warden-surface border border-warden-primary/40 shadow-[0_0_20px_hsl(var(--warden-primary)/0.15)]"
+                        transition={{
+                          type: 'spring',
+                          stiffness: 380,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+                    <Icon
+                      className={`h-4 w-4 relative z-10 ${
+                        isActive ? 'text-warden-primary' : 'text-warden-text/50'
+                      }`}
+                    />
+                    <span className="relative z-10">{label}</span>
+                    <span className="hidden md:inline-block relative z-10 text-[9px] px-1.5 py-0.2 rounded border border-warden-border/60 bg-warden-bg/50 text-warden-text/40">
+                      {tag}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Right slot — Live Telemetry & Theme Toggle */}
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-warden-border/70 bg-warden-surface/50 text-[10px] font-mono text-warden-text/70">
+              <span className="w-2 h-2 rounded-full bg-warden-emerald animate-pulse" />
+              <span className="text-warden-text/40 uppercase">AI SHIELD:</span>
+              <span className="text-warden-emerald font-bold tracking-wide">ACTIVE</span>
+            </div>
+
+            <ThemeToggle />
+          </div>
+        </nav>
+      </header>
+
+      {/* Spacer to prevent content from jumping under fixed navbar on subpages */}
+      <div className="h-14 sm:h-16" />
 
       {/* ─────────────────────────────────────────────────────────────
           2. FLOATING "RESTORE TOP" BUTTON (Bottom Center on Deep Scroll)
