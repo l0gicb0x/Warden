@@ -31,6 +31,7 @@ import FadeIn from '@/components/motion/FadeIn';
 import { speakWarden } from '@/components/common/SentinelCompanion';
 import ZenShieldDial from '@/components/common/ZenShieldDial';
 import BenchmarkCard from '@/components/common/BenchmarkCard';
+import LogoIntroAnimation from '@/components/common/LogoIntroAnimation';
 import { useTheme } from '@/context/ThemeContext';
 
 const PRESETS = [
@@ -202,6 +203,9 @@ const DashboardPage = () => {
           </button>
         </div>
       </div>
+
+      {/* ── Grand Animated Logo Intro Shield ── */}
+      <LogoIntroAnimation />
 
       {/* ── Top Bento KPI Metrics ── */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
