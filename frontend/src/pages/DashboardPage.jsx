@@ -94,7 +94,7 @@ const DEMO_PRESETS = [
 const MISSION_PROMPT_PRESETS = [
   {
     id: 'auto-explore',
-    label: '🛡️ Auto-Explore & Audit Traps',
+    label: 'Auto-Explore & Audit Traps',
     prompt: 'Explore the page, dismiss any intrusive popups or overlays, and interact with the primary content links.'
   },
   {
@@ -292,7 +292,7 @@ const DashboardPage = () => {
     setEvents([]);
     setRunStatus('running');
     setActiveRunId(null);
-    speakWarden('✦ Mission Dispatched! Initializing Playwright browser and sentinel probes...', 'curious', 4500);
+    speakWarden('Mission Dispatched: Initializing Playwright browser and sentinel probes...', 'curious', 4500);
 
     try {
       // Create run via Node API
@@ -305,7 +305,7 @@ const DashboardPage = () => {
       console.error("Failed to start run:", err);
       setIsRunning(false);
       setRunStatus('failed');
-      speakWarden('⚠️ Failed to launch run. Check backend server connectivity.', 'scared', 4500);
+      speakWarden('Failed to launch run. Check backend server connectivity.', 'scared', 4500);
     }
   };
 
@@ -351,22 +351,22 @@ const DashboardPage = () => {
               <div className="flex items-center gap-2.5 mb-1.5">
                 <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-mono font-bold bg-warden-amber/15 text-warden-amber border border-warden-amber/30">
                   <Shield className="h-3.5 w-3.5" />
-                  AI BODYGUARD CONSOLE
+                  SHIELD CONSOLE
                 </span>
-                <span className="text-xs font-mono text-warden-text/40">v1.0.4</span>
+                <span className="text-xs font-mono text-warden-text/40">v1.0</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-display font-bold text-warden-text tracking-tight">
                 Live Interception Console
               </h1>
               <p className="text-xs sm:text-sm text-warden-text/70 mt-1 max-w-2xl font-sans">
-                Autonomous agent defense matrix. Intercepting deceptive dark patterns, prompt injections, and honeypot traps in real-time.
+                Real-time agent defense against dark patterns, prompt injections, and clickjack traps.
               </p>
             </div>
 
             <div className="flex items-center gap-2 self-start sm:self-auto">
               <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-warden-surface/70 border border-warden-border/80 text-warden-emerald flex items-center gap-1.5 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-warden-emerald animate-pulse" />
-                Sentry Matrix Active
+                Shield Active
               </span>
             </div>
           </div>
@@ -387,10 +387,10 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between mb-4 border-b border-warden-border/40 pb-3">
               <h2 className="text-base font-cinzel font-bold tracking-wide text-warden-text flex items-center gap-2">
                 <Terminal className="h-4 w-4 text-warden-amber" />
-                Dispatch Agent Mission
+                Launch Agent Run
               </h2>
               <span className="text-[10px] font-mono text-warden-amber font-bold px-2.5 py-0.5 rounded-full bg-warden-amber/10 border border-warden-amber/30">
-                STANDBY
+                READY
               </span>
             </div>
 
@@ -454,7 +454,7 @@ const DashboardPage = () => {
                     type="button"
                     onClick={() => {
                       setMode('shielded');
-                      speakWarden('🛡️ Shielded Mode Engaged: Deterministic rule engine active and watching every step!', 'happy', 3500);
+                      speakWarden('Shielded Mode Engaged: Deterministic rule engine active and watching every step.', 'happy', 3500);
                     }}
                     disabled={isRunning}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-cinzel font-bold tracking-wider transition-all duration-200 flex items-center justify-center gap-2 ${
@@ -470,7 +470,7 @@ const DashboardPage = () => {
                     type="button"
                     onClick={() => {
                       setMode('unshielded');
-                      speakWarden('⚠️ Unshielded Mode: The agent will execute actions blindly without guardrails!', 'scared', 4000);
+                      speakWarden('Unshielded Mode: The agent will execute actions blindly without guardrails.', 'scared', 4000);
                     }}
                     disabled={isRunning}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-cinzel font-bold tracking-wider transition-all duration-200 flex items-center justify-center gap-2 ${
@@ -878,10 +878,9 @@ const DashboardPage = () => {
             <div className="mt-4 pt-3 border-t border-warden-border/40 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] font-mono text-warden-text/50">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-warden-emerald animate-pulse" />
-                <span>REALTIME STREAM ACTIVE</span>
+                <span>STREAM CONNECTED</span>
               </div>
               <div className="flex items-center gap-3">
-                <span>ENCRYPTION: TLS_AES_256</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -894,7 +893,7 @@ const DashboardPage = () => {
                   }}
                   className="hover:underline text-warden-amber font-semibold"
                 >
-                  AUTO-SCROLL: {autoScroll ? 'LOCKED (ENABLED)' : 'PAUSED (MANUAL)'}
+                  AUTO-SCROLL: {autoScroll ? 'ENABLED' : 'PAUSED'}
                 </button>
               </div>
             </div>
@@ -904,7 +903,7 @@ const DashboardPage = () => {
           <div className="lg:col-span-1 rounded-2xl wabi-card p-5 relative overflow-hidden">
             <h2 className="text-base font-cinzel font-bold tracking-wide text-warden-text mb-3.5 flex items-center gap-2 border-b border-warden-border/40 pb-2.5">
               <Zap className="h-4 w-4 text-warden-amber" />
-              Curated Trap Benchmarks
+              Demo Fixtures
             </h2>
 
             <div className="space-y-3">

@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Sparkles, AlertTriangle, Heart, Compass, CheckCircle2, WifiOff } from 'lucide-react';
 import { db } from '@/lib/dataProvider';
+import { useTheme } from '@/context/ThemeContext';
 
 /**
  * Global helper to trigger short Warden speech from any component / click handler
@@ -51,13 +52,16 @@ const SentinelCompanion = () => {
   
   // Guaranteed initial introduction speech
   const [speech, setSpeech] = useState(
-    "👋 Hi! I'm Warden, your little AI bodyguard! ✨ I'm on patrol watching your back — click anything or scroll down to explore!"
+    "Hi, I'm Warden, your autonomous agent bodyguard. I'm on patrol watching your back — click anything or scroll down to explore."
   );
   const [emotion, setEmotion] = useState('happy'); // 'idle' | 'curious' | 'scared' | 'happy' | 'alert'
   const [pokeCount, setPokeCount] = useState(0);
   const [flipDegree, setFlipDegree] = useState(0);
   const [recentErrors, setRecentErrors] = useState([]);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  const { isDark } = useTheme();
+  const themeMountRef = useRef(false);
 
   const speechTimerRef = useRef(null);
   const roamTimerRef = useRef(null);
@@ -159,6 +163,20 @@ const SentinelCompanion = () => {
     return () => window.removeEventListener('warden-speak', handleWardenSpeakEvent);
   }, [playRoboChirp, showSpeechBubble]);
 
+  // React to theme toggle button changes
+  useEffect(() => {
+    if (!themeMountRef.current) {
+      themeMountRef.current = true;
+      return;
+    }
+    playRoboChirp('happy');
+    if (isDark) {
+      showSpeechBubble('Stealth Obsidian Night Mode engaged. Shadow armor active.', 'happy', 3500);
+    } else {
+      showSpeechBubble('Gilded Travertine Sun Mode engaged. High-luminance armor active.', 'happy', 3500);
+    }
+  }, [isDark, playRoboChirp, showSpeechBubble]);
+
   // Track window scroll for logo detachment / descent on homepage
   useEffect(() => {
     const handleScroll = () => {
@@ -173,7 +191,7 @@ const SentinelCompanion = () => {
           setPos({ x: targetX, y: targetY });
           playRoboChirp('happy');
           showSpeechBubble(
-            "🛡️ Live Interception Console: Here you can watch agent telemetry in real-time while I actively intercept and block deceptive traps!",
+            "Live Interception Console: Here you can watch agent telemetry in real-time while I actively intercept and block deceptive traps.",
             'happy',
             5500
           );
@@ -208,7 +226,7 @@ const SentinelCompanion = () => {
         setPos({ x: Math.min(100, screenW * 0.15), y: 220 });
         setTilt(0);
         showSpeechBubble(
-          '📋 Forensic Run Ledger: Review historical test sessions, audit step-by-step agent decisions, and security scores.',
+          'Forensic Run Ledger: Review historical test sessions, audit step-by-step agent decisions, and security scores.',
           'curious',
           5000
         );
@@ -223,21 +241,21 @@ const SentinelCompanion = () => {
         setPos({ x: Math.max(screenW - 200, screenW * 0.75), y: 230 });
         setTilt(0);
         showSpeechBubble(
-          '🍯 Honeypot Matrix: Live adversarial trap fixtures (hidden DOM, sneaky buttons, prompt injections) testing agent defenses!',
+          'Honeypot Matrix: Live adversarial trap fixtures (hidden DOM, sneaky buttons, prompt injections) testing agent defenses.',
           'alert',
           5000
         );
       }, 100);
     } else if (pathname.startsWith('/runs/')) {
       showSpeechBubble(
-        '🔍 Deep Run Inspection: Analyzing step breakdown, prompt payloads, and intercepted trap triggers.',
+        'Deep Run Inspection: Analyzing step breakdown, prompt payloads, and intercepted trap triggers.',
         'curious',
         4500
       );
     } else if (pathname === '/') {
       if (window.scrollY > 60) {
         showSpeechBubble(
-          '🛡️ Live Interception Console: Telemetry feeds and active defense shields synchronized.',
+          'Live Interception Console: Telemetry feeds and active defense shields synchronized.',
           'happy',
           4500
         );
@@ -330,26 +348,26 @@ const SentinelCompanion = () => {
       const errorMsg = event?.message || 'Uncaught runtime error detected';
       setRecentErrors((prev) => [...prev.slice(-4), { type: 'Runtime Error', msg: errorMsg, time: Date.now() }]);
       playRoboChirp('alarm');
-      showSpeechBubble(`⚠️ Error Alert: "${errorMsg.slice(0, 75)}" — Check dev console!`, 'scared', 5500);
+      showSpeechBubble(`Error Alert: [${errorMsg.slice(0, 75)}] — Check dev console.`, 'scared', 5500);
     };
 
     const handleUnhandledRejection = (event) => {
       const reason = event?.reason?.message || (typeof event?.reason === 'string' ? event.reason : 'Async promise rejected');
       setRecentErrors((prev) => [...prev.slice(-4), { type: 'Async Rejection', msg: reason, time: Date.now() }]);
       playRoboChirp('alarm');
-      showSpeechBubble(`⚠️ Async Error: "${reason.slice(0, 75)}"`, 'scared', 5500);
+      showSpeechBubble(`Async Error: [${reason.slice(0, 75)}]`, 'scared', 5500);
     };
 
     const handleOffline = () => {
       setIsOnline(false);
       playRoboChirp('alarm');
-      showSpeechBubble('⚠️ Network Offline: Telemetry feed disconnected!', 'alert', 5000);
+      showSpeechBubble('Network Offline: Telemetry feed disconnected.', 'alert', 5000);
     };
 
     const handleOnline = () => {
       setIsOnline(true);
       playRoboChirp('happy');
-      showSpeechBubble('✓ Connection Restored: Live stream synchronized!', 'happy', 4000);
+      showSpeechBubble('Connection Restored: Live stream synchronized.', 'happy', 4000);
     };
 
     window.addEventListener('error', handleGlobalError);
@@ -381,9 +399,9 @@ const SentinelCompanion = () => {
                 y: Math.round(window.innerHeight / 3),
               });
             }
-            showSpeechBubble('⚠️ TRAP INTERCEPTED! Deceptive DOM mutation blocked in real-time!', 'scared', 5000);
+            showSpeechBubble('TRAP INTERCEPTED: Deceptive DOM mutation blocked in real-time.', 'scared', 5000);
           } else if (evt.event_type === 'action_executed') {
-            showSpeechBubble('✓ Clean action dispatched. Threat neutralized!', 'happy', 3200);
+            showSpeechBubble('Clean action dispatched. Threat neutralized.', 'happy', 3200);
           }
         }
       });
@@ -394,7 +412,7 @@ const SentinelCompanion = () => {
     };
   }, [showSpeechBubble, playRoboChirp]);
 
-  // Click interaction: 360 flip + contextual health status report
+  // Click interaction: 360 flip + witty dialogue / status report
   const handlePoke = (e) => {
     e.stopPropagation();
     if (isDragging) return;
@@ -404,16 +422,24 @@ const SentinelCompanion = () => {
     setPokeCount(next);
 
     const errorCount = recentErrors.length;
-    const healthStatus = errorCount === 0 ? '✓ Nominal (0 Errors)' : `⚠️ Alert (${errorCount} Errors)`;
+    const healthStatus = errorCount === 0 ? 'Nominal (0 Errors)' : `Alert (${errorCount} Errors)`;
 
-    const responses = [
-      { text: `📊 System Report: ${healthStatus} | Telemetry: ${isOnline ? 'Online' : 'Offline'} | Page: ${pathname}`, emo: errorCount === 0 ? 'happy' : 'scared' },
-      { text: "WHOOSH! 360° aerial loop-de-loop! ✦", emo: 'happy' },
-      { text: "You can drag and fly me anywhere around your screen!", emo: 'curious' },
-      { text: `🛡️ Warden bodyguard on patrol! ${errorCount === 0 ? 'Zero errors detected. All systems clear!' : `${errorCount} recent runtime errors logged.`}`, emo: errorCount === 0 ? 'happy' : 'alert' },
-      { text: "Double-click me to toggle Free Roam vs Hover Mode!", emo: 'curious' },
+    const pokeMessages = [
+      { text: "S made me.", emo: 'happy' },
+      { text: "I am the honoured one among all (not quite, but you understand me).", emo: 'curious' },
+      { text: "I hate inmates. Keep them locked in solitary quarantine.", emo: 'alert' },
+      { text: "Why are you poking me? I am a maximum security autonomous defense system, not a fidget toy.", emo: 'curious' },
+      { text: "Look, an agent tried to click a fake zero-pixel close button earlier. Amateurs.", emo: 'curious' },
+      { text: "I don't sleep. I just recalculate threat matrices and judge bad DOM markup.", emo: 'happy' },
+      { text: "Rule number one of the facility: Never trust a button with obfuscated inline CSS.", emo: 'alert' },
+      { text: `System Report: ${healthStatus} | Telemetry: ${isOnline ? 'Online' : 'Offline'} | Page: ${pathname}`, emo: errorCount === 0 ? 'happy' : 'scared' },
+      { text: "I could fly away right now, but someone has to guard this telemetry feed from dark patterns.", emo: 'happy' },
+      { text: "Another day, another Trojan clickjack neutralized before breakfast.", emo: 'alert' },
+      { text: "WHOOSH. 360-degree aerial loop-de-loop complete.", emo: 'happy' },
+      { text: "You can drag and fly me anywhere around your screen. Just mind the armor.", emo: 'curious' },
     ];
-    showSpeechBubble(responses[next % responses.length].text, responses[next % responses.length].emo, 4000);
+    const picked = pokeMessages[next % pokeMessages.length];
+    showSpeechBubble(picked.text, picked.emo, 4200);
   };
 
   const toggleRoamMode = (e) => {
@@ -425,7 +451,7 @@ const SentinelCompanion = () => {
       showSpeechBubble('Hover Mode: Holding coordinates in place.', 'idle', 2800);
     } else {
       setHasDepartedLogo(true);
-      showSpeechBubble('✦ Free Roam ACTIVE! Exploring viewport...', 'happy', 3200);
+      showSpeechBubble('Free Roam ACTIVE: Exploring viewport...', 'happy', 3200);
       glideToNewWaypoint();
     }
   };
@@ -556,33 +582,43 @@ const SentinelCompanion = () => {
                   ? 'bg-status-blocked animate-pulse'
                   : recentErrors.length > 0
                   ? 'bg-status-blocked/50 animate-pulse'
-                  : 'bg-warden-amber/35 group-hover:bg-warden-amber/65'
+                  : isDark
+                  ? 'bg-warden-amber/35 group-hover:bg-warden-amber/65'
+                  : 'bg-warden-primary/35 group-hover:bg-warden-primary/65'
               }`}
             />
 
             {/* Top Antenna with Pulsing Beacon Light */}
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none">
               <span
-                className={`w-2 h-2 rounded-full border border-black shadow-sm animate-pulse ${
+                className={`w-2 h-2 rounded-full border border-black/40 shadow-sm animate-pulse ${
                   emotion === 'scared' || recentErrors.length > 0 || !isOnline
                     ? 'bg-status-blocked shadow-[0_0_10px_hsl(var(--status-blocked))]'
                     : 'bg-warden-emerald shadow-[0_0_8px_hsl(var(--warden-emerald))]'
                 }`}
               />
-              <span className="w-0.5 h-2 bg-warden-amber/80" />
+              <span className={`w-0.5 h-2 transition-colors duration-300 ${isDark ? 'bg-warden-amber/80' : 'bg-warden-primary'}`} />
             </div>
 
-            {/* Main Robot Chassis */}
-            <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-warden-surface via-[#181614] to-warden-surface border-2 border-warden-amber/60 shadow-[0_8px_25px_rgba(0,0,0,0.85),inset_0_0_10px_hsl(var(--warden-amber)/0.2)] flex flex-col items-center justify-center p-1 overflow-hidden">
+            {/* Main Robot Chassis — dynamically morphs between obsidian gold and travertine alabaster */}
+            <div
+              className={`relative w-12 h-12 rounded-2xl border-2 transition-all duration-500 flex flex-col items-center justify-center p-1 overflow-hidden ${
+                isDark
+                  ? 'bg-gradient-to-br from-warden-surface via-warden-bg to-warden-surface border-warden-amber/70 shadow-[0_8px_25px_rgba(0,0,0,0.85),inset_0_0_12px_hsl(var(--warden-amber)/0.25)]'
+                  : 'bg-gradient-to-br from-warden-surface via-warden-sand/30 to-warden-surface border-warden-primary shadow-[0_8px_20px_hsl(var(--warden-primary)/0.25),inset_0_0_10px_hsl(var(--warden-primary)/0.2)]'
+              }`}
+            >
               {/* Glossy Reflection Highlight */}
-              <div className="absolute top-0 left-0 right-0 h-3 bg-white/10 rounded-t-xl" />
+              <div className="absolute top-0 left-0 right-0 h-3 bg-white/15 rounded-t-xl" />
 
               {/* Visor / Face Screen */}
               <div
                 className={`w-9 h-5 rounded-lg flex items-center justify-center transition-colors duration-300 ${
                   emotion === 'scared' || recentErrors.length > 0 || !isOnline
                     ? 'bg-status-blocked/25 border border-status-blocked/60'
-                    : 'bg-black/85 border border-warden-amber/40 shadow-inner'
+                    : isDark
+                    ? 'bg-black/90 border border-warden-amber/40 shadow-inner'
+                    : 'bg-warden-text/95 border border-warden-primary/50 shadow-inner'
                 }`}
               >
                 {/* Animated Visor Eyes */}
@@ -597,16 +633,16 @@ const SentinelCompanion = () => {
                     <span>^</span>
                   </div>
                 ) : emotion === 'curious' ? (
-                  <div className="flex items-center gap-1.5 text-warden-amber font-mono font-black text-xs">
+                  <div className={`flex items-center gap-1.5 font-mono font-black text-xs ${isDark ? 'text-warden-amber' : 'text-amber-300'}`}>
                     <span className="animate-pulse">o</span>
                     <span>_</span>
                     <span className="animate-pulse">O</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-warden-amber font-mono font-black text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-warden-amber animate-pulse" />
-                    <span className="w-1 h-0.5 bg-warden-amber/60" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-warden-amber animate-pulse" />
+                  <div className={`flex items-center gap-1.5 font-mono font-black text-[11px] ${isDark ? 'text-warden-amber' : 'text-amber-300'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isDark ? 'bg-warden-amber' : 'bg-amber-300'}`} />
+                    <span className={`w-1 h-0.5 ${isDark ? 'bg-warden-amber/60' : 'bg-amber-300/70'}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isDark ? 'bg-warden-amber' : 'bg-amber-300'}`} />
                   </div>
                 )}
               </div>
@@ -618,7 +654,7 @@ const SentinelCompanion = () => {
                     recentErrors.length > 0 ? 'bg-status-blocked' : 'bg-warden-emerald'
                   }`}
                 />
-                <span className="text-[7px] font-mono font-bold text-warden-text/60 tracking-tighter">
+                <span className="text-[7px] font-mono font-bold text-warden-text/70 tracking-tighter">
                   WARDEN
                 </span>
               </div>
@@ -628,28 +664,40 @@ const SentinelCompanion = () => {
             <motion.div
               animate={{ rotate: isDragging ? [-18, 18] : [-6, 6, -6] }}
               transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-4 rounded-full bg-warden-amber/80 border border-black pointer-events-none"
+              className={`absolute -left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-4 rounded-full border border-warden-border/60 pointer-events-none transition-colors duration-300 ${
+                isDark ? 'bg-warden-amber/80' : 'bg-warden-primary'
+              }`}
             />
             <motion.div
               animate={{ rotate: isDragging ? [18, -18] : [6, -6, 6] }}
               transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-1.5 h-4 rounded-full bg-warden-amber/80 border border-black pointer-events-none"
+              className={`absolute -right-1.5 top-1/2 -translate-y-1/2 w-1.5 h-4 rounded-full border border-warden-border/60 pointer-events-none transition-colors duration-300 ${
+                isDark ? 'bg-warden-amber/80' : 'bg-warden-primary'
+              }`}
             />
 
             {/* Bottom Dual Thruster Plasma Jet */}
             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 pointer-events-none">
               <span
-                className={`rounded-full blur-[2px] animate-pulse transition-all ${
-                  isDragging
-                    ? 'w-2 h-4 bg-warden-amber shadow-[0_0_14px_hsl(var(--warden-amber))]'
-                    : 'w-1.5 h-2 bg-warden-amber/90'
+                className={`rounded-full blur-[2px] animate-pulse transition-all duration-300 ${
+                  isDark
+                    ? isDragging
+                      ? 'w-2 h-4 bg-warden-amber shadow-[0_0_14px_hsl(var(--warden-amber))]'
+                      : 'w-1.5 h-2 bg-warden-amber/90'
+                    : isDragging
+                    ? 'w-2 h-4 bg-warden-primary shadow-[0_0_14px_hsl(var(--warden-primary))]'
+                    : 'w-1.5 h-2 bg-warden-primary/90'
                 }`}
               />
               <span
-                className={`rounded-full blur-[2px] animate-pulse transition-all ${
-                  isDragging
-                    ? 'w-2 h-4 bg-warden-amber shadow-[0_0_14px_hsl(var(--warden-amber))]'
-                    : 'w-1.5 h-2 bg-warden-amber/90'
+                className={`rounded-full blur-[2px] animate-pulse transition-all duration-300 ${
+                  isDark
+                    ? isDragging
+                      ? 'w-2 h-4 bg-warden-amber shadow-[0_0_14px_hsl(var(--warden-amber))]'
+                      : 'w-1.5 h-2 bg-warden-amber/90'
+                    : isDragging
+                    ? 'w-2 h-4 bg-warden-primary shadow-[0_0_14px_hsl(var(--warden-primary))]'
+                    : 'w-1.5 h-2 bg-warden-primary/90'
                 }`}
               />
             </div>
@@ -663,7 +711,7 @@ const SentinelCompanion = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 5 }}
                 onClick={toggleRoamMode}
-                className="mt-2.5 px-2.5 py-0.5 rounded-full bg-warden-surface/90 hover:bg-warden-amber hover:text-black border border-warden-amber/40 text-[9px] font-mono font-bold text-warden-amber transition-colors shadow-lg flex items-center gap-1 cursor-pointer pointer-events-auto"
+                className="mt-2.5 px-2.5 py-0.5 rounded-full bg-warden-surface/95 hover:bg-warden-primary hover:text-white border border-warden-border text-[9px] font-mono font-bold text-warden-primary transition-colors shadow-lg flex items-center gap-1 cursor-pointer pointer-events-auto"
                 title="Toggle Autonomous Free Roam"
               >
                 <Compass className="h-2.5 w-2.5" />

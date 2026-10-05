@@ -88,7 +88,7 @@ const RunsPage = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-16 sm:pt-20">
       {/* ── Header Banner ── */}
       <FadeIn delay={0.05}>
         <div className="wabi-card rounded-2xl p-5 sm:p-6 relative overflow-hidden">
@@ -97,25 +97,22 @@ const RunsPage = () => {
               <div className="flex items-center gap-3 flex-wrap mb-1.5">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-warden-surface/60 border border-warden-border text-warden-amber text-[10px] font-mono tracking-wider">
                   <Sparkles className="h-3.5 w-3.5 text-warden-amber" />
-                  <span>TELEMETRY ARCHIVE</span>
+                  <span>SESSION LOGS</span>
                 </div>
-                <span className="text-[10px] font-mono text-warden-text/40 tracking-wider">
-                  [ HISTORICAL_INSPECTION ]
-                </span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl font-display font-black tracking-tight text-warden-text">
-                Session Telemetry &amp; Runs
+                Runs &amp; Telemetry
               </h1>
               <p className="text-xs sm:text-sm font-sans text-warden-text/75 mt-1 max-w-2xl leading-relaxed">
-                Historical ledger of autonomous agent missions, defensive interventions, and deterministic threat neutralizations.
+                Historical ledger of autonomous agent sessions, defensive interventions, and security outcomes.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono text-warden-amber font-bold px-3 py-1 rounded-full bg-warden-amber/15 border border-warden-amber/40 shadow-sm flex items-center gap-1.5">
                 <Radio className="h-3.5 w-3.5 text-warden-amber animate-pulse" />
-                LIVE REALTIME SYNC
+                LIVE SYNC
               </span>
             </div>
           </div>
@@ -127,7 +124,7 @@ const RunsPage = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <button
             type="button"
-            onClick={() => speakWarden && speakWarden(`Archived ${totalRuns} total recorded agent sessions in the ledger.`, 'curious', 3000)}
+            onClick={() => speakWarden && speakWarden(`Archived ${totalRuns} total recorded agent sessions.`, 'curious', 3000)}
             className="rounded-2xl wabi-card p-4 relative overflow-hidden text-left hover:border-warden-amber/50 transition-all cursor-pointer group"
           >
             <div className="flex justify-between items-center mb-1">
@@ -140,7 +137,7 @@ const RunsPage = () => {
 
           <button
             type="button"
-            onClick={() => speakWarden && speakWarden(`${shieldedRuns} sessions guarded with Warden deterministic shield defense!`, 'happy', 3000)}
+            onClick={() => speakWarden && speakWarden(`${shieldedRuns} sessions guarded with Warden shield defense.`, 'happy', 3000)}
             className="rounded-2xl wabi-card p-4 relative overflow-hidden text-left hover:border-warden-amber/50 transition-all cursor-pointer group"
           >
             <div className="flex justify-between items-center mb-1">
@@ -153,7 +150,7 @@ const RunsPage = () => {
 
           <button
             type="button"
-            onClick={() => speakWarden && speakWarden(`${blockedCount} deceptive honeypots and dark patterns intercepted in the wild!`, 'alert', 3000)}
+            onClick={() => speakWarden && speakWarden(`${blockedCount} deceptive traps intercepted.`, 'alert', 3000)}
             className="rounded-2xl wabi-card p-4 relative overflow-hidden text-left hover:border-status-blocked/50 transition-all cursor-pointer group"
           >
             <div className="flex justify-between items-center mb-1">
@@ -166,7 +163,7 @@ const RunsPage = () => {
 
           <button
             type="button"
-            onClick={() => speakWarden && speakWarden(`${completedCount} clean trajectories executed without adversarial hindrance.`, 'happy', 3000)}
+            onClick={() => speakWarden && speakWarden(`${completedCount} clean runs executed safely.`, 'happy', 3000)}
             className="rounded-2xl wabi-card p-4 relative overflow-hidden text-left hover:border-warden-emerald/50 transition-all cursor-pointer group"
           >
             <div className="flex justify-between items-center mb-1">
@@ -189,20 +186,20 @@ const RunsPage = () => {
             </div>
             <div className="text-[11px] font-mono text-warden-amber bg-warden-amber/15 border border-warden-amber/40 px-3 py-0.5 rounded-full font-bold flex items-center gap-1.5">
               <MousePointerClick className="h-3 w-3" />
-              <span>{runs.length} Sessions (Click to Inspect)</span>
+              <span>{runs.length} Sessions</span>
             </div>
           </div>
 
           {loading ? (
             <div className="rounded-xl p-10 text-center bg-warden-surface/20 border border-warden-border/60">
               <p className="text-xs text-warden-amber font-mono animate-pulse uppercase tracking-wider">
-                ✦ Retrieving session telemetry from Supabase Realtime...
+                Loading session telemetry...
               </p>
             </div>
           ) : runs.length === 0 ? (
             <div className="rounded-xl p-10 text-center bg-warden-surface/20 border border-warden-border/60">
               <p className="text-xs text-warden-text/50 font-mono uppercase tracking-wider">
-                No session logs recorded yet. Dispatch a run from the Live Console.
+                No session logs recorded yet.
               </p>
             </div>
           ) : (

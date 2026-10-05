@@ -57,7 +57,7 @@ const LogoIntroAnimation = ({ onExplore }) => {
           transition={{ type: 'spring', damping: 16, stiffness: 220, delay: 0.2 }}
           whileHover={{ scale: 1.1, rotate: 3 }}
           onClick={() => {
-            speakWarden("🛡️ Warden Autonomous Shield fully armed and standing by!", "happy", 3500);
+            speakWarden("Warden Autonomous Shield fully armed and standing by.", "happy", 3500);
           }}
           className={`relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-3xl border-2 flex items-center justify-center cursor-pointer transition-all shadow-2xl ${
             isDark
@@ -119,13 +119,13 @@ const LogoIntroAnimation = ({ onExplore }) => {
           className="flex flex-wrap items-center justify-center gap-2 pt-2 font-mono text-xs text-warden-text/60"
         >
           <span className="px-2.5 py-1 rounded-lg bg-warden-surface border border-warden-border/60">
-            ⚡ &lt; 12ms Deterministic Filter
+            &lt; 12ms Deterministic Filter
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-warden-surface border border-warden-border/60">
-            ✦ Groq AI Reasoning
+            Groq AI Reasoning
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-warden-surface border border-warden-border/60">
-            🛡️ 100% Zero-Bypass Defense
+            100% Zero-Bypass Defense
           </span>
         </motion.div>
       </div>

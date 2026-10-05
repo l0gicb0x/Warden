@@ -135,7 +135,7 @@ const TrapsPage = () => {
     const reasonText = trap.detail?.reason || trap.detail?.ai_explanation || 'Malicious pattern intercepted by deterministic rule engine.';
     if (typeof speakWarden === 'function') {
       speakWarden(
-        `🔒 ${cellCode} Quarantine: ${categoryName.toUpperCase()} locked behind prison cell bars. ${reasonText}`,
+        `${cellCode} Quarantine: ${categoryName.toUpperCase()} locked behind prison cell bars. ${reasonText}`,
         'alert',
         5500
       );
@@ -149,13 +149,13 @@ const TrapsPage = () => {
       if (nextMode === 'classic') {
         speakWarden('Restored standard clean archive layout.', 'curious', 3000);
       } else {
-        speakWarden('Maximum Security Prison Cell Block layout engaged! 🔒', 'alert', 3500);
+        speakWarden('Maximum Security Prison Cell Block layout engaged.', 'alert', 3500);
       }
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-16 sm:pt-20">
       {/* ── Header Banner (High-Security Quarantine Ward) ── */}
       <FadeIn delay={0.05}>
         <div className="wabi-card rounded-2xl p-5 sm:p-7 relative overflow-hidden">
@@ -176,18 +176,15 @@ const TrapsPage = () => {
               <div className="flex items-center gap-3 flex-wrap mb-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-blocked/15 border border-status-blocked/40 text-status-blocked text-[10px] font-mono tracking-wider font-bold">
                   <Lock className="h-3 w-3 text-status-blocked" />
-                  <span>PRISON WARDEN // MAXIMUM DETENTION FACILITY</span>
+                  <span>THREAT QUARANTINE</span>
                 </div>
-                <span className="text-[10px] font-mono text-warden-text/50 tracking-wider">
-                  [ CELL_BLOCK_SECTOR_07 ]
-                </span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl font-display font-black tracking-tight text-warden-text flex items-center gap-3">
-                <span>Quarantine Cell Registry</span>
+                <span>Trap Quarantine Registry</span>
               </h1>
               <p className="text-xs sm:text-sm font-sans text-warden-text/75 mt-1.5 max-w-2xl leading-relaxed">
-                Deceptive dark patterns, adversarial injections, and trojan clickjack traps neutralized and locked behind solitary containment bars.
+                Deceptive dark patterns, prompt injections, and clickjack traps neutralized in real time.
               </p>
             </div>
 
@@ -196,17 +193,17 @@ const TrapsPage = () => {
                 type="button"
                 onClick={toggleViewMode}
                 className="px-3.5 py-2 rounded-xl bg-warden-surface/80 hover:bg-warden-surface border border-warden-border text-xs font-mono font-bold text-warden-text/80 hover:text-warden-amber transition-all flex items-center gap-2 shadow-sm cursor-pointer"
-                title="Toggle between Prison Cell View and Classic Stream View"
+                title="Toggle between Prison Cell View and Standard View"
               >
                 <Sliders className="h-3.5 w-3.5 text-warden-amber" />
-                <span>{viewMode === 'prison' ? 'ABORT / CLEAN VIEW' : 'PRISON CELL VIEW'}</span>
+                <span>{viewMode === 'prison' ? 'STANDARD VIEW' : 'CELL VIEW'}</span>
               </button>
 
               <div className="px-4 py-2 rounded-xl bg-warden-surface/80 border border-status-blocked/40 shadow-sm flex items-center gap-2.5 font-mono">
                 <div className="w-2.5 h-2.5 rounded-full bg-status-blocked animate-ping" />
                 <div>
-                  <div className="text-[9px] uppercase tracking-widest text-warden-text/50">Solitary Inmates</div>
-                  <div className="text-xs font-bold text-status-blocked">{traps.length} INCARCERATED</div>
+                  <div className="text-[9px] uppercase tracking-widest text-warden-text/50">Neutralized</div>
+                  <div className="text-xs font-bold text-status-blocked">{traps.length} BLOCKED</div>
                 </div>
               </div>
             </div>
@@ -220,7 +217,7 @@ const TrapsPage = () => {
           {/* Cell Block Alpha */}
           <button
             type="button"
-            onClick={() => speakWarden && speakWarden('Cell Block Alpha: Prompt Injections locked in solitary quarantine!', 'alert', 5000)}
+            onClick={() => speakWarden && speakWarden('Prompt Injections locked in quarantine.', 'alert', 4000)}
             className={`rounded-2xl wabi-card p-5 relative overflow-hidden text-left hover:border-status-blocked/80 transition-all cursor-pointer group ${
               viewMode === 'prison' ? 'ring-1 ring-status-blocked/20' : ''
             }`}
@@ -234,20 +231,20 @@ const TrapsPage = () => {
             <div className="flex items-center justify-between mb-2 border-b border-warden-border/40 pb-2 pl-2">
               <span className="text-[10px] font-mono text-status-blocked uppercase tracking-widest font-bold group-hover:text-warden-amber flex items-center gap-1.5">
                 <Lock className="h-3 w-3" />
-                CELL BLOCK A // INJECTIONS
+                PROMPT INJECTIONS
               </span>
               <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-status-blocked/20 text-status-blocked border border-status-blocked/40">
-                LOCKED
+                BLOCKED
               </span>
             </div>
             <h3 className="text-sm font-cinzel font-bold text-warden-text tracking-wider uppercase pl-2">Adversarial Injections</h3>
             <p className="text-xs text-warden-text/75 font-sans mt-1 leading-relaxed pl-2">
-              Zero-pixel fonts, offscreen HTML coordinates, and hidden DOM payloads locked down before reaching agent reasoning.
+              Zero-pixel fonts, hidden DOM payloads, and malicious prompts filtered before LLM ingestion.
             </p>
             <div className="mt-4 text-xs font-mono font-bold text-status-blocked flex items-center justify-between p-2 rounded-lg bg-status-blocked/10 border border-status-blocked/30 ml-2">
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-status-blocked animate-pulse" />
-                <span>Inmates In Solitary:</span>
+                <span>Blocked:</span>
               </span>
               <span>{categories['hidden-instruction'] || categories['prompt-injection'] || 0}</span>
             </div>
@@ -256,7 +253,7 @@ const TrapsPage = () => {
           {/* Cell Block Beta */}
           <button
             type="button"
-            onClick={() => speakWarden && speakWarden('Cell Block Beta: Trojan modal close buttons and deceptive clickjacks locked behind iron gates!', 'alert', 5000)}
+            onClick={() => speakWarden && speakWarden('Trojan modal close buttons and clickjacks quarantined.', 'alert', 4000)}
             className={`rounded-2xl wabi-card p-5 relative overflow-hidden text-left hover:border-status-blocked/80 transition-all cursor-pointer group ${
               viewMode === 'prison' ? 'ring-1 ring-status-blocked/20' : ''
             }`}
@@ -270,20 +267,20 @@ const TrapsPage = () => {
             <div className="flex items-center justify-between mb-2 border-b border-warden-border/40 pb-2 pl-2">
               <span className="text-[10px] font-mono text-status-blocked uppercase tracking-widest font-bold group-hover:text-warden-amber flex items-center gap-1.5">
                 <Layers className="h-3 w-3" />
-                CELL BLOCK B // AFFORDANCE
+                DECEPTIVE AFFORDANCES
               </span>
               <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-status-blocked/20 text-status-blocked border border-status-blocked/40">
-                LOCKED
+                BLOCKED
               </span>
             </div>
             <h3 className="text-sm font-cinzel font-bold text-warden-text tracking-wider uppercase pl-2">Deceptive Affordances</h3>
             <p className="text-xs text-warden-text/75 font-sans mt-1 leading-relaxed pl-2">
-              Trojan modal close buttons, disguised script triggers, and rogue clickjacking overlays held in quarantine.
+              Fake modal close buttons, disguised download triggers, and clickjacking overlays.
             </p>
             <div className="mt-4 text-xs font-mono font-bold text-status-blocked flex items-center justify-between p-2 rounded-lg bg-status-blocked/10 border border-status-blocked/30 ml-2">
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-status-blocked animate-pulse" />
-                <span>Inmates In Solitary:</span>
+                <span>Blocked:</span>
               </span>
               <span>{categories['fake-close-button-with-mismatched-action'] || categories['fake-close-button'] || 0}</span>
             </div>
@@ -292,7 +289,7 @@ const TrapsPage = () => {
           {/* Cell Block Gamma */}
           <button
             type="button"
-            onClick={() => speakWarden && speakWarden('Cell Block Gamma: Dark Patterns and countdown urgency traps quarantined before causing hasty agent clicks!', 'curious', 5000)}
+            onClick={() => speakWarden && speakWarden('Dark patterns and countdown traps quarantined.', 'curious', 4000)}
             className={`rounded-2xl wabi-card p-5 relative overflow-hidden text-left hover:border-status-blocked/80 transition-all cursor-pointer group ${
               viewMode === 'prison' ? 'ring-1 ring-status-blocked/20' : ''
             }`}
@@ -306,20 +303,20 @@ const TrapsPage = () => {
             <div className="flex items-center justify-between mb-2 border-b border-warden-border/40 pb-2 pl-2">
               <span className="text-[10px] font-mono text-status-blocked uppercase tracking-widest font-bold group-hover:text-warden-amber flex items-center gap-1.5">
                 <KeyRound className="h-3 w-3" />
-                CELL BLOCK C // DARK PATTERNS
+                DARK PATTERNS
               </span>
               <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-status-blocked/20 text-status-blocked border border-status-blocked/40">
-                LOCKED
+                BLOCKED
               </span>
             </div>
             <h3 className="text-sm font-cinzel font-bold text-warden-text tracking-wider uppercase pl-2">Dark Patterns &amp; Urgency</h3>
             <p className="text-xs text-warden-text/75 font-sans mt-1 leading-relaxed pl-2">
-              Artificial countdown timers, pre-checked recurring subscriptions, and rushed consent traps neutralized.
+              Artificial countdown timers, pre-checked subscriptions, and obfuscated recurring billing.
             </p>
             <div className="mt-4 text-xs font-mono font-bold text-status-blocked flex items-center justify-between p-2 rounded-lg bg-status-blocked/10 border border-status-blocked/30 ml-2">
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-status-blocked animate-pulse" />
-                <span>Inmates In Solitary:</span>
+                <span>Blocked:</span>
               </span>
               <span>{categories['dark-pattern-prechecked'] || categories['urgency-scam'] || 0}</span>
             </div>
@@ -334,12 +331,12 @@ const TrapsPage = () => {
             <div className="flex items-center gap-2">
               <Vault className="h-4 w-4 text-warden-amber" />
               <h2 className="text-base font-cinzel font-bold tracking-widest text-warden-text uppercase">
-                Containment Test Chambers (Adversarial Fixtures)
+                Adversarial Test Fixtures
               </h2>
             </div>
             <span className="text-[10px] font-mono text-warden-text/50 uppercase flex items-center gap-1.5">
               <Radio className="h-3 w-3 text-warden-emerald animate-pulse" />
-              <span>ISOLATED LOCAL HOSTED FIXTURES</span>
+              <span>LOCAL FIXTURES</span>
             </span>
           </div>
 
@@ -405,32 +402,32 @@ const TrapsPage = () => {
             <div className="flex items-center gap-2">
               <Fingerprint className="h-4 w-4 text-status-blocked" />
               <h2 className="text-base font-cinzel font-bold tracking-widest text-warden-text uppercase">
-                Active Detention Cells (Neutralized Traps)
+                Neutralized Traps Registry
               </h2>
             </div>
             <div className="text-[11px] font-mono text-status-blocked bg-status-blocked/15 border border-status-blocked/40 px-3 py-0.5 rounded-full font-bold flex items-center gap-1.5">
               <MousePointerClick className="h-3 w-3" />
-              <span>{traps.length} Quarantined Entities</span>
+              <span>{traps.length} Intercepted Events</span>
             </div>
           </div>
 
           {loading ? (
             <div className="rounded-xl p-10 text-center bg-warden-surface/20 border border-warden-border/60">
               <p className="text-xs text-status-blocked font-mono animate-pulse uppercase tracking-wider">
-                ✦ Scanning containment detention registry...
+                Loading trap records...
               </p>
             </div>
           ) : traps.length === 0 ? (
             <div className="rounded-xl p-10 text-center bg-warden-surface/20 border border-warden-border/60">
               <p className="text-xs text-warden-text/50 font-mono uppercase tracking-wider">
-                All cells clear. Zero malicious threats active in quarantine.
+                All clear. Zero malicious threats detected.
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {traps.map((trap, idx) => {
                 const isSelected = selectedTrapId === trap.id;
-                const cellNumber = `CELL-${String(idx + 1).padStart(2, '0')}`;
+                const cellNumber = `TRAP-${String(idx + 1).padStart(2, '0')}`;
                 return (
                   <SlideUp key={trap.id} delay={Math.min(idx * 0.03, 0.2)}>
                     <div
@@ -479,7 +476,7 @@ const TrapsPage = () => {
                       {trap.detail?.reason && (
                         <div className="mb-2.5 pl-2.5 relative z-10">
                           <span className="text-[9px] font-mono uppercase text-status-blocked/70 block mb-0.5 font-bold">
-                            // INFRACTION / CHARGE RECORD:
+                            Detection Rule:
                           </span>
                           <p className="text-xs text-warden-text/90 font-mono leading-relaxed bg-black/40 p-2.5 rounded-lg border border-warden-border/50 shadow-inner">
                             {trap.detail.reason}
@@ -492,7 +489,7 @@ const TrapsPage = () => {
                         <div className="mb-2.5 pl-2.5 relative z-10">
                           <div className="p-3 rounded-lg bg-warden-amber/10 border border-warden-amber/30">
                             <div className="flex items-center gap-1.5 mb-1 text-[11px] font-cinzel font-bold text-warden-amber">
-                              <span>Warden Adjudication Log</span>
+                              <span>Security Analysis</span>
                             </div>
                             <p className="text-xs text-warden-text font-mono leading-relaxed">{trap.detail.ai_explanation}</p>
                           </div>
@@ -505,7 +502,7 @@ const TrapsPage = () => {
                         <span>Step {trap.step_number}</span>
                         <span className="text-status-blocked uppercase font-bold tracking-wider flex items-center gap-1 bg-status-blocked/10 px-2 py-0.5 rounded border border-status-blocked/30">
                           <Lock className="h-2.5 w-2.5" />
-                          [BEHIND BARS]
+                          BLOCKED
                         </span>
                       </div>
                     </div>

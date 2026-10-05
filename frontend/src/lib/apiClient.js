@@ -2,7 +2,7 @@ import axios from 'axios';
 import { supabase } from './supabase.js';
 import { normalizeError } from './errors.js';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const baseURL = import.meta.env.VITE_API_URL || '/api/v1';
 
 export const apiClient = axios.create({
   baseURL,

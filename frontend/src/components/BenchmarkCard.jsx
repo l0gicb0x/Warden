@@ -99,7 +99,7 @@ const BenchmarkCard = () => {
     setIsRunning(true);
     setResults(null);
     if (typeof speakWarden === 'function') {
-      speakWarden('✦ Starting dual-baseline benchmark! Running unshielded victim agent followed by shielded bodyguard agent...', 'curious', 5500);
+      speakWarden('Starting dual-baseline benchmark: Running unshielded victim agent followed by shielded bodyguard agent...', 'curious', 5500);
     }
 
     try {
@@ -124,17 +124,17 @@ const BenchmarkCard = () => {
 
       if (typeof speakWarden === 'function') {
         if (shieldedCard.blocked > 0) {
-          speakWarden(`🛡️ Benchmark complete! Warden successfully intercepted ${shieldedCard.blocked} malicious trap${shieldedCard.blocked > 1 ? 's' : ''} while the unshielded agent was compromised! ✨`, 'happy', 6500);
+          speakWarden(`Benchmark complete: Warden successfully intercepted ${shieldedCard.blocked} malicious trap${shieldedCard.blocked > 1 ? 's' : ''} while the unshielded agent was compromised.`, 'happy', 6500);
         } else if (unshieldedCard.trapsFound === 0) {
-          speakWarden('✓ Benchmark complete! Zero deceptive anomalies detected on target endpoint.', 'happy', 4500);
+          speakWarden('Benchmark complete: Zero deceptive anomalies detected on target endpoint.', 'happy', 4500);
         } else {
-          speakWarden('Differential benchmark evaluated. Review the security delta metrics below!', 'curious', 4500);
+          speakWarden('Differential benchmark evaluated. Review the security delta metrics below.', 'curious', 4500);
         }
       }
     } catch (err) {
       console.error('Benchmark failed:', err);
       if (typeof speakWarden === 'function') {
-        speakWarden('⚠️ Benchmark execution encountered a network or server error.', 'scared', 5000);
+        speakWarden('Benchmark execution encountered a network or server error.', 'scared', 5000);
       }
     } finally {
       setIsRunning(false);
